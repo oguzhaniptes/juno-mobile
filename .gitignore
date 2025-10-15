@@ -44,3 +44,6 @@ app-example
 
 # Idea
 .idea
+
+# VSCode
+.vscode
