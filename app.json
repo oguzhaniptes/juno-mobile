@@ -1,15 +1,16 @@
 {
   "expo": {
-    "name": "juno-mobile",
-    "slug": "juno-mobile",
+    "name": "Juno",
+    "slug": "juno",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "junomobile",
+    "scheme": "juno",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.juno"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,11 +19,12 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
+      "package": "com.juno",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "output": "static",
+      "output": "server",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
@@ -43,6 +45,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1cd9ecdf-fadd-418f-a92e-4997dddf5ec0"
+      }
     }
   }
 }
