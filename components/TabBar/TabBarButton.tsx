@@ -5,10 +5,10 @@ import Animated, { interpolate, useAnimatedStyle, useSharedValue, withSpring } f
 import { AntDesign, Feather } from "@expo/vector-icons";
 
 export const icons = {
+  community: (props: any) => <AntDesign name="usergroup-add" size={20} {...props} />,
+  awards: (props: any) => <AntDesign name="trophy" size={20} {...props} />,
+  profile: (props: any) => <AntDesign name="user" size={20} {...props} />,
   index: (props: any) => <AntDesign name="home" size={20} {...props} />,
-  explore: (props: any) => <Feather name="compass" size={20} {...props} />,
-  create: (props: any) => <AntDesign name="pluscircleo" size={20} {...props} />, // Bu muhtemelen sizin 'create' rotanız.
-  profile: (props: any) => <AntDesign name="user" size={20} {...props} />, // Bu muhtemelen 'users' veya 'profile' rotanız.
 };
 
 const TabBarButton = (props: any) => {
