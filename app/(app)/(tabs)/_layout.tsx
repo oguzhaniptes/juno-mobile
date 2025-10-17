@@ -14,7 +14,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
       }}
-      tabBar={(props) => <TabBar {...props} />}
+      tabBar={(props) => <TabBar colorScheme={colorScheme} {...props} />}
     >
       <Tabs.Screen name="index" options={{ title: "Home" }} />
       <Tabs.Screen name="awards" options={{ title: "Awards" }} />

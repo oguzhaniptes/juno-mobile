@@ -3,7 +3,7 @@ import React from "react";
 import { AntDesign, Feather } from "@expo/vector-icons";
 import TabBarButton from "./TabBarButton";
 
-const TabBar = ({ state, descriptors, navigation }: any) => {
+const TabBar = ({ state, descriptors, navigation, colorScheme }: any) => {
   const primaryColor = "#0891b2";
   const greyColor = "#737373";
   return (
