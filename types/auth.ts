@@ -13,7 +13,7 @@ export interface AuthData {
 }
 
 export interface AuthProviderProps {
-  signIn: (provider?: AuthProvider) => Promise<void>;
+  signIn: (provider: AuthProvider) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signInWithMicrosoft: () => Promise<void>;
   signOut: () => Promise<void>;

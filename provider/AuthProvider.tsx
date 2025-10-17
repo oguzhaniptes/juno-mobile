@@ -116,7 +116,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
     userId && salt ? { user_id: userId, salt: salt } : null;
 
   // ✅ Generic Sign In
-  const signIn = async (provider?: AuthProvider) => {
+  const signIn = async (provider: AuthProvider) => {
     const selectedProvider = provider || AuthProvider.GOOGLE;
 
     switch (selectedProvider) {
