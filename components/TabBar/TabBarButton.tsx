@@ -1,8 +1,7 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import React, { useEffect } from "react";
 import Animated, { interpolate, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 
 export const icons = {
   community: (props: any) => <AntDesign name="usergroup-add" size={20} {...props} />,
@@ -32,7 +31,6 @@ const TabBarButton = (props: any) => {
   });
   //   const animatedTextStyle = useAnimatedStyle(() => {
   //     const opacity = interpolate(scale.value, [0, 1], [1, 0]);
-
   //     return {
   //       // styles
   //       opacity,
@@ -66,7 +64,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    // gap: 4,
   },
 });
 
