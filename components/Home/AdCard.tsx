@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, Platform } from "react-native";
-import Feather from "react-native-vector-icons/Feather"; // Kapatma simgesi için
+import Feather from "react-native-vector-icons/Feather";
 
 interface AdCardProps {
   title: string;
