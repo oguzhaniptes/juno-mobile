@@ -2,6 +2,7 @@ import React from "react";
 import { View } from "react-native";
 import PostCard from "./PostCard";
 import AdCard from "./AdCard";
+import NewsCard from "./NewsCard";
 
 export interface FeedItem {
   id: number;
@@ -22,7 +23,7 @@ export interface FeedItem {
 export const renderFeedItem = ({ item }: { item: FeedItem }) => {
   const itemKey = String(item.id);
 
-  if (item.type === "news" || item.type === "user-post") {
+  if (item.type === "news") {
     const commonProps = {
       type: item.type,
       content: item.content || "",
@@ -32,19 +33,26 @@ export const renderFeedItem = ({ item }: { item: FeedItem }) => {
       shares: item.shares || 0,
     };
 
-    if (item.type === "news") {
-      return (
-        <View key={itemKey}>
-          <PostCard {...commonProps} category={item.category || ""} title={item.title || ""} />
-        </View>
-      );
-    } else if (item.type === "user-post") {
-      return (
-        <View key={itemKey}>
-          <PostCard {...commonProps} authorName={item.authorName || ""} />
-        </View>
-      );
-    }
+    return (
+      <View key={itemKey}>
+        <NewsCard authorAvatarUrl="" {...commonProps} category={item.category || ""} title={item.title || ""} />
+      </View>
+    );
+  } else if (item.type === "user-post") {
+    const commonProps = {
+      type: item.type,
+      content: item.content || "",
+      imageUrl: item.imageUrl || "",
+      likes: item.likes || 0,
+      comments: item.comments || 0,
+      shares: item.shares || 0,
+    };
+
+    return (
+      <View key={itemKey}>
+        <PostCard authorAvatarUrl="" {...commonProps} authorName={item.authorName || ""} />
+      </View>
+    );
   } else if (item.type === "ad") {
     return (
       <View key={itemKey}>

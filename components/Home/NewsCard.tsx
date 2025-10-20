@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Platform } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import InteractionButtons from "../InteractionButtons";
 
 const NativeBadge = ({ category }: any) => (
@@ -9,7 +9,7 @@ const NativeBadge = ({ category }: any) => (
 );
 
 interface NewsCardProps {
-  type: "news" | "user-post";
+  type: "news";
   category?: string;
   title?: string;
   content: string;
@@ -40,14 +40,8 @@ const styles = StyleSheet.create({
   cardContainer: {
     backgroundColor: "white",
     borderRadius: 8,
-
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: Platform.OS === "ios" ? 0.15 : 0.4,
-    shadowRadius: 3,
     elevation: 3,
     padding: 24,
-    marginBottom: 16,
     borderWidth: 1,
     borderColor: "#E5E7EB",
     position: "relative",
@@ -79,7 +73,7 @@ const styles = StyleSheet.create({
   },
 
   titleText: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "bold",
     color: "#1F2937",
     marginTop: 4,
