@@ -1,7 +1,6 @@
-import React from "react";
-import { View, Text, StyleSheet, Image, Platform } from "react-native";
-import Avatar from "../ui/avatar";
-import InteractionButtons from "../InteractionButtons";
+import { View, Text, StyleSheet, Image } from "react-native";
+import Avatar from "@/components/ui/avatar";
+import InteractionButtons from "@/components/InteractionButtons";
 
 interface PostCardProps {
   type: "user-post";
