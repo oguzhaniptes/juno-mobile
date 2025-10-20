@@ -1,7 +1,6 @@
 import { useRouter } from "expo-router";
 import ProfileHeader from "@/components/Home/ProfileHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { GlobalStyles } from "@/styles";
 import LiveMatchesCarousel from "@/components/Home/LiveMatchesCarousel";
 import { feedItems, liveMatches } from "@/mock";
 import { renderFeedItem } from "@/components/Home/FeedCarousel";
@@ -11,12 +10,12 @@ export default function HomeScreen() {
   const router = useRouter();
 
   return (
-    <SafeAreaView style={GlobalStyles.container}>
+    <SafeAreaView>
       <FlatList
         data={feedItems}
         renderItem={renderFeedItem}
         keyExtractor={(item) => item.id.toString()}
-        style={styles.feedList}
+        style={{ marginTop: 8, paddingHorizontal: 24, backgroundColor: "transparent" }}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListHeaderComponent={() => (
@@ -43,8 +42,8 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   feedList: {
-    flex: 1,
-    padding: 16,
+    // flex: 1,
+    // padding: 16,
     backgroundColor: "#F3F4F6",
   },
   headerContainer: {
@@ -57,7 +56,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   footerSpace: {
-    height: 60,
+    height: 80,
   },
   emptyContainer: {
     flex: 1,
@@ -67,6 +66,6 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 16,
-    backgroundColor: "#ffbaba75",
+    // backgroundColor: "#ffbaba75",
   },
 });

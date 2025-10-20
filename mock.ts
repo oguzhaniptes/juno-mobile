@@ -121,3 +121,31 @@ export const feedItems = [
     ctaLink: "/fantasy-league",
   },
 ] as FeedItem[];
+
+interface Community {
+  id: number;
+  name: string;
+  members: number;
+  description: string;
+  cover: string; // URI
+}
+
+export const userCommunities: Community[] = [
+  { id: 1, name: "Madridistas", members: 12840, description: "Real Madrid fans worldwide.", cover: "https://via.placeholder.com/100/f60/fff?text=RM" },
+  { id: 2, name: "NBA Talk", members: 53210, description: "Daily hoops banter and insights.", cover: "https://via.placeholder.com/100/000/fff?text=NBA" },
+  { id: 7, name: "Arsenal Gooners", members: 21450, description: "North London is red. Matches, memes, transfers.", cover: "https://via.placeholder.com/100/FF0000/fff?text=ARS" },
+  { id: 8, name: "Lakers Nation", members: 60231, description: "LA hoops. Game threads, highlights, history.", cover: "https://via.placeholder.com/100/551A8B/fff?text=LAL" },
+  { id: 9, name: "Tennis Talk", members: 17420, description: "ATP/WTA debates, tour news, and rankings.", cover: "https://via.placeholder.com/100/008000/fff?text=TEN" },
+  { id: 10, name: "Premier Banter", members: 31290, description: "EPL chatter, weekly matchday threads.", cover: "https://via.placeholder.com/100/0000FF/fff?text=EPL" },
+  { id: 11, name: "EuroBall", members: 12980, description: "UEFA nights, transfers, and rumors.", cover: "https://via.placeholder.com/100/FFD700/000?text=UEFA" },
+];
+
+export const activeMatchCommunities: Community[] = [
+  { id: 3, name: "Premier League Live", members: 40211, description: "Live chat for today's fixtures.", cover: "https://via.placeholder.com/100/FF69B4/fff?text=LIVE" },
+  { id: 4, name: "US Open Watch", members: 9870, description: "Set-by-set tennis reactions.", cover: "https://via.placeholder.com/100/800080/fff?text=USO" },
+];
+
+export const suggestedCommunities: Community[] = [
+  { id: 5, name: "Tactics & Analysis", members: 22145, description: "Deep dives into strategy and plays.", cover: "https://via.placeholder.com/100/00FFFF/000?text=TAC" },
+  { id: 6, name: "FPL Pros", members: 15190, description: "Fantasy tips, lineups and waivers.", cover: "https://via.placeholder.com/100/008080/fff?text=FPL" },
+];

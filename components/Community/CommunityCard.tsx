@@ -1,66 +1,61 @@
-import { CommunityCard, SectionHeader } from "@/components/Community/CommunityCard";
-import { LayoutProvider } from "@/components/layout";
-import { activeMatchCommunities, suggestedCommunities, userCommunities } from "@/mock";
-import React, { useState } from "react";
-import { View, Text, StyleSheet, Platform } from "react-native";
+// --- HELPER COMPONENT: CommunityCard ---
+import { Image, TouchableOpacity, Platform, View, Text, Linking, StyleSheet } from "react-native";
 
-export default function CommunityPage() {
-  const [showAllUserCommunities, setShowAllUserCommunities] = useState(false);
-
-  // 🔥 DÜZELTME: Maksimum 5 (slice(0, 5)) veya tümünü göster
-  const maxInitialCount = 5;
-  const displayedUserCommunities = showAllUserCommunities ? userCommunities : userCommunities.slice(0, maxInitialCount);
-
-  // Gerçek bir uygulamada yönlendirme hook'u kullanılırdı (useRouter veya useNavigation)
-  const handleExploreMore = (href: string) => {
-    console.log(`Navigating to: ${href}`);
-  };
-
-  return (
-    <LayoutProvider>
-      <Text style={styles.pageMainTitle}>Communities</Text>
-
-      {/* --- 1. Your Communities Section --- */}
-      <View>
-        <SectionHeader title={`Your communities (${userCommunities.length})`} showAll={showAllUserCommunities} onToggle={() => setShowAllUserCommunities((v) => !v)} />
-
-        <View style={styles.gridContainer}>
-          {displayedUserCommunities.map((c) => (
-            <CommunityCard
-              key={c.id}
-              name={c.name}
-              members={c.members}
-              description={c.description}
-              cover={c.cover}
-              onJoin={() => console.log(`Joined ${c.name}`)}
-              onPress={() => console.log(`View ${c.name}`)}
-            />
-          ))}
-        </View>
-      </View>
-
-      {/* --- 2. Active Match Communities Section --- (Aynı mantıkla devam eder) */}
-      <View>
-        <SectionHeader title="Active match communities" linkHref="/community/active" onToggle={null} />
-        <View>
-          {activeMatchCommunities.map((c) => (
-            <CommunityCard key={c.id} name={c.name} members={c.members} description={c.description} cover={c.cover} onJoin={() => {}} onPress={() => {}} />
-          ))}
-        </View>
-      </View>
-
-      {/* --- 3. Suggested Communities Section --- */}
-      <View style={styles.section}>
-        <SectionHeader title="Suggested communities" linkHref="/community/suggested" onToggle={null} />
-        <View style={styles.gridContainer}>
-          {suggestedCommunities.map((c) => (
-            <CommunityCard key={c.id} name={c.name} members={c.members} description={c.description} cover={c.cover} onJoin={() => {}} onPress={() => {}} />
-          ))}
-        </View>
-      </View>
-    </LayoutProvider>
-  );
+interface CommunityCardProps {
+  name: string;
+  members: number;
+  description: string;
+  cover: string; // URI
+  onJoin: () => void;
+  onPress: () => void;
 }
+
+export const CommunityCard: React.FC<CommunityCardProps> = ({ name, members, description, cover, onJoin, onPress }) => (
+  // Ana Kapsayıcı: bg-card rounded-lg shadow-md border border-gray-200 p-4 flex
+  <TouchableOpacity onPress={onPress} style={styles.cardContainer}>
+    {/* Sol Kısım: Avatar */}
+    <View style={styles.cardImageWrapper}>
+      <Image source={{ uri: cover }} style={styles.cardImage} resizeMode="cover" />
+    </View>
+
+    {/* Orta Kısım: Bilgiler (pr-20'den kaçınmak için flex: 1) */}
+    <View style={styles.cardInfo}>
+      <Text style={styles.cardTitle}>{name}</Text>
+      <Text style={styles.cardMembers}>{members.toLocaleString()} members</Text>
+      {/* line-clamp-2 karşılığı: numberOfLines */}
+      <Text style={styles.cardDescription} numberOfLines={2}>
+        {description}
+      </Text>
+    </View>
+
+    {/* Sağ Kısım: Join Butonu (absolute bottom-4 right-4) */}
+    <View style={styles.cardButtonWrapper}>
+      <TouchableOpacity onPress={onJoin} style={styles.joinButton}>
+        <Text style={styles.joinButtonText}>Join</Text>
+      </TouchableOpacity>
+    </View>
+  </TouchableOpacity>
+);
+
+// --- HELPER FUNCTION: Section Header ---
+export const SectionHeader = ({ title, showAll, onToggle, linkHref }: any) => {
+  return (
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {onToggle ? (
+        // Göster/Gizle Butonu
+        <TouchableOpacity onPress={onToggle}>
+          <Text style={styles.linkText}>{showAll ? "Show less" : "See all"}</Text>
+        </TouchableOpacity>
+      ) : (
+        // Explore more Linki
+        <TouchableOpacity onPress={() => Linking.openURL(linkHref)}>
+          <Text style={styles.linkText}>Explore more</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   screenContainer: {
