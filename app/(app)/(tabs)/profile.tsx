@@ -1,45 +1,18 @@
 import { LayoutProvider } from "@/components/layout";
 import Avatar from "@/components/ui/avatar";
+import { useSession } from "@/provider/AuthProvider";
+import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
-// Yönlendirme ve Session hook'larının Native versiyonlarını varsayıyoruz
-// --- MOCK BİLEŞENLER VE TİP YARDIMLARI ---
-
-// Auth verisinin yapısını varsayıyoruz
-interface AuthData {
-  username: string;
-  fullName: string;
-  joined: string;
-  score: number;
-  gold: number;
-  diamonds: number;
-}
-// useRouter hook'unu taklit ediyoruz
-const mockUseRouter = () => ({ push: (path: string) => console.log(`Navigating to: ${path}`) });
-const mockUseSession = () => ({
-  authData: {
-    username: "ethan.carter",
-    fullName: "Ethan Carter",
-    joined: "2021",
-    score: 1200,
-    gold: 500,
-    diamonds: 200,
-  } as AuthData,
-  isLoading: false,
-});
-// Bu satırları kendi gerçek hook'larınızla değiştirin
-const useRouter = mockUseRouter;
-const useSession = mockUseSession;
 
 export default function ProfileScreen() {
   const { authData, isLoading } = useSession();
+  console.log("👤 ProfileScreen authData:", authData);
   const router = useRouter();
 
-  // Web'den Native'e taşınan auth/redirect mantığı
   useEffect(() => {
-    // Expo Router'da router.replace('/login') daha yaygındır.
     if (!isLoading && !authData) {
-      router.push("/login");
+      router.push("/sign-in");
     }
   }, [authData, isLoading, router]);
 
@@ -58,44 +31,38 @@ export default function ProfileScreen() {
 
   return (
     <LayoutProvider>
-      {/* Profile Content: bg-white rounded-lg shadow p-6 */}
       <View style={styles.profileContentBox}>
         <View style={styles.profileDetailsRow}>
-          {/* Avatar: h-32 w-32 rounded-full object-cover ring-4 ring-gray-200 */}
-          {/* <Image source={{ uri: "https://via.placeholder.com/150/0000FF/FFFFFF?text=P" }} style={styles.avatar} resizeMode="cover" /> */}
           <Avatar></Avatar>
           <View style={styles.infoWrapper}>
             <View style={styles.userInfoTopRow}>
-              {/* 🔥 textWrapper stili eklendi */}
               <View style={styles.textWrapper}>
-                <Text style={styles.displayNameText}>{authData.fullName}</Text>
-                <Text style={styles.usernameText}>@{authData.username}</Text>
-                <Text style={styles.joinedText}>Joined {authData.joined}</Text>
+                <Text style={styles.displayNameText}>Mock Name</Text>
+                <Text style={styles.usernameText}>@mockname</Text>
+                <Text style={styles.usernameText}>mail@com</Text>
+                <Text style={styles.joinedText}>Joined 01 01 1970</Text>
+                <Text style={styles.joinedText}>Wallet: 0x000000</Text>
               </View>
             </View>
 
-            {/* Stats: grid grid-cols-3 gap-4 mt-6 max-w-md */}
             <View style={styles.statsGrid}>
-              <StatBox value={authData.score} label="Score" />
-              <StatBox value={authData.gold} label="Gold" />
-              <StatBox value={authData.diamonds} label="Diamonds" />
+              <StatBox value={1000} label="Score" />
+              <StatBox value={1000} label="Gold" />
+              <StatBox value={1000} label="Diamonds" />
             </View>
           </View>
         </View>
 
-        {/* Info Rows: mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 */}
         <View style={styles.infoGrid}>
           <InfoRow title="Favorite Team" value="Los Angeles Lakers" />
           <InfoRow title="Favorite Sport" value="Basketball" />
-          <ActionRow title="Owned Items" subtitle="View your collectibles" onPress={() => router.push("/items")} />
-          <ActionRow title="Wallet Address" subtitle="Manage wallet" onPress={() => router.push("/wallet")} />
+          <ActionRow title="Owned Items" subtitle="View your collectibles" onPress={() => router.push("/")} />
+          <ActionRow title="Wallet Address" subtitle="Manage wallet" onPress={() => router.push("/")} />
         </View>
       </View>
     </LayoutProvider>
   );
 }
-
-// --- HELPER COMPONENTS ---
 
 const StatBox = ({ value, label }: { value: number; label: string }) => (
   <View style={styles.statBox}>
@@ -121,8 +88,6 @@ const ActionRow = ({ title, subtitle, onPress }: { title: string; subtitle: stri
   </TouchableOpacity>
 );
 
-// --- STYLES ---
-
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
@@ -137,13 +102,12 @@ const styles = StyleSheet.create({
   },
   screenContainer: {
     flex: 1,
-    backgroundColor: "#F3F4F6", // Hafif gri arka plan
+    backgroundColor: "#F3F4F6",
   },
   contentPadding: {
     padding: 16,
   },
 
-  // --- Header Stilleri ---
   headerBox: {
     backgroundColor: "white",
     borderRadius: 8,
@@ -152,8 +116,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
-    padding: 24, // p-6
-    marginBottom: 24, // mb-6
+    padding: 24,
+    marginBottom: 24,
   },
   headerRow: {
     flexDirection: "row",
@@ -161,16 +125,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerTitle: {
-    fontSize: 24, // text-3xl'e yakın
+    fontSize: 24,
     fontWeight: "bold",
     color: "#1F2937",
   },
   headerSubtitle: {
     color: "#4B5563",
-    marginTop: 4, // mt-1
+    marginTop: 4,
   },
 
-  // --- Profile Content Stilleri ---
   profileContentBox: {
     backgroundColor: "white",
     borderRadius: 8,
@@ -182,92 +145,83 @@ const styles = StyleSheet.create({
     padding: 24, // p-6
   },
   profileDetailsRow: {
-    // flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    // alignContent: "center",
-    // alignItems: "flex-start",
+
     gap: 24, // gap-6
   },
   infoWrapper: {
     flexDirection: "column",
-    alignItems: "center", // 🔥 İçeriği YATAYDA ORTALA
+    alignItems: "center",
     justifyContent: "center",
   },
   userInfoTopRow: {
-    // Bu View'ın çocuklarını ortalaması gerekir, ama metin tek bir View içinde
     alignItems: "center",
     justifyContent: "center",
   },
   textWrapper: {
-    alignItems: "center", // 🔥 Metin satırlarını ortalar
+    alignItems: "center",
   },
 
   displayNameText: {
-    fontSize: 20, // text-2xl'e yakın
+    fontSize: 20,
     fontWeight: "bold",
     color: "#1F2937",
   },
   usernameText: {
-    fontSize: 14, // text-sm
-    color: "#2563EB", // text-blue-600
+    fontSize: 14,
+    color: "#2563EB",
   },
   joinedText: {
-    fontSize: 12, // text-xs
-    color: "#6B7280", // text-gray-500
+    fontSize: 12,
+    color: "#6B7280",
   },
 
-  // --- Stats Grid Stilleri ---
   statsGrid: {
-    flexDirection: "row", // grid-cols-3 yerine
-    // justifyContent: "center",
-    // alignItems: "center",
-    // alignContent: "center",
-    marginTop: 24, // mt-6
-    gap: 16, // gap-4
-    // maxWidth: 300, // max-w-md
+    flexDirection: "row",
+
+    marginTop: 24,
+    gap: 16,
   },
   statBox: {
-    // flex: 1, // Üç eşit sütun
     borderWidth: 1,
     borderColor: "#E5E7EB",
     borderRadius: 8,
-    padding: 16, // p-4
-    alignItems: "center", // text-center
+    padding: 16,
+    alignItems: "center",
   },
   statValue: {
-    fontSize: 20, // text-2xl'e yakın
+    fontSize: 20,
     fontWeight: "bold",
     color: "#1F2937",
   },
   statLabel: {
-    fontSize: 12, // text-xs
+    fontSize: 12,
     color: "#6B7280",
   },
 
-  // --- Info Rows Stilleri ---
   infoGrid: {
     marginTop: 32, // mt-8
-    // Mobil için tek sütun (grid-cols-1)
-    gap: 16, // gap-4
+
+    gap: 16,
   },
   infoRow: {
     borderWidth: 1,
-    borderColor: "#F3F4F6", // border-gray-100
+    borderColor: "#F3F4F6",
     borderRadius: 8,
-    padding: 16, // p-4
+    padding: 16,
   },
   infoRowTitle: {
-    fontSize: 12, // text-xs
+    fontSize: 12,
     color: "#6B7280",
   },
   infoRowValue: {
-    fontSize: 14, // text-sm
+    fontSize: 14,
     fontWeight: "500",
     color: "#1F2937",
-    marginTop: 4, // mt-1
+    marginTop: 4,
   },
-  // --- Action Rows Stilleri (Button) ---
+
   actionRow: {
     borderWidth: 1,
     borderColor: "#F3F4F6",
@@ -276,10 +230,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    // text-left (TouchableOpacity'de hizalama gerektirmez)
   },
   arrowText: {
-    fontSize: 24, // Ok simgesi için
-    color: "#9CA3AF", // text-gray-400
+    fontSize: 24,
+    color: "#9CA3AF",
   },
 });
