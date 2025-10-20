@@ -5,17 +5,18 @@ import LiveMatchesCarousel from "@/components/Home/LiveMatchesCarousel";
 import { feedItems, liveMatches } from "@/mock";
 import { renderFeedItem } from "@/components/Home/FeedCarousel";
 import { FlatList, View, StyleSheet, Text } from "react-native";
+import { GlobalStyles } from "@/styles";
 
 export default function HomeScreen() {
   const router = useRouter();
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={GlobalStyles.safeAreaView}>
       <FlatList
         data={feedItems}
         renderItem={renderFeedItem}
         keyExtractor={(item) => item.id.toString()}
-        style={{ marginTop: 8, paddingHorizontal: 24, backgroundColor: "transparent" }}
+        style={{ paddingHorizontal: 24, backgroundColor: "transparent" }}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListHeaderComponent={() => (
@@ -49,6 +50,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     gap: 12,
     marginBottom: 12,
+    marginTop: 12,
   },
   feedTitle: {
     fontSize: 20,
