@@ -1,8 +1,13 @@
 import { useSession } from "@/provider/AuthProvider";
 import { Stack } from "expo-router";
+import Loading from "@/components/loading";
 
 function RootNavigator() {
-  const { authData } = useSession();
+  const { authData, isLoading } = useSession();
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <Stack>

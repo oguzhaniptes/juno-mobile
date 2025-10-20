@@ -31,8 +31,6 @@ const TabBarButton: React.FC<TabBarButtonProps> = ({ isFocused, label, routeName
 
   return (
     <Pressable {...pressableProps} style={styles.container}>
-      {" "}
-      {/* ✅ Props'ları spread et */}
       <Animated.View style={[animatedIconStyle]}>
         {(TabBarIcons as any)[routeName]({
           color: color,
