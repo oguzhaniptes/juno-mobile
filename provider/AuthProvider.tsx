@@ -1,16 +1,11 @@
-import {
-  use,
-  createContext,
-  type PropsWithChildren,
-  useState,
-  useEffect,
-} from "react";
+import { use, createContext, type PropsWithChildren, useState, useEffect } from "react";
 import { useStorageState } from "@/hooks/use-storage-state";
 import { useAuthRequest } from "expo-auth-session";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
 import { AuthData, AuthProvider, AuthProviderProps } from "@/types";
 import { AUTH_DISCOVERY, AUTH_PROVIDERS_CONFIG, BASE_URL } from "@/constants";
+import { useSessionStorageState } from "@/hooks/use-session-storage-state";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -20,6 +15,7 @@ const AuthContext = createContext<AuthProviderProps>({
   signInWithMicrosoft: async () => {},
   signOut: async () => {},
   authData: null,
+  ephemeralData: null,
   isLoading: false,
 });
 
@@ -34,21 +30,28 @@ export function useSession() {
 }
 
 export function SessionProvider({ children }: PropsWithChildren) {
+  // Auth Data stored in SecureStore
   const [[isLoadingUserId, userId], setUserId] = useStorageState("user_id");
   const [[isLoadingSalt, salt], setSalt] = useStorageState("salt");
+  const [[isLoadingProvider, provider], setProvider] = useStorageState("provider");
+  const [[isLoadingName, name], setName] = useStorageState("name");
+  const [[isLoadingMail, mail], setMail] = useStorageState("mail");
+  const [[isLoadingPhotoUrl, photoUrl], setPhotoUrl] = useStorageState("photo_url");
+  const [[isLoadingMaxEpoch, maxEpoch], setMaxEpoch] = useStorageState("max_epoch");
+
+  // Ephemeral Data stored in SessionStorage (per Sui SDK pattern)
+  const [[isLoadingRandomness, jwtRandomness], setJwtRandomness] = useSessionStorageState("jwt_randomness");
+  const [[isLoadingNonce, nonce], setNonce] = useSessionStorageState("nonce");
+  const [[isLoadingPubKey, extendedEphemeralPublicKey], setExtendedEphemeralPublicKey] = useSessionStorageState("extended_ephemeral_public_key");
+  const [[isLoadingPrivKey, extendedEphemeralPrivateKey], setExtendedEphemeralPrivateKey] = useSessionStorageState("extended_ephemeral_private_key");
+
   const [isAuthLoading, setIsAuthLoading] = useState(false);
 
   // ✅ Google Auth Hook
-  const [, googleResponse, promptGoogleAsync] = useAuthRequest(
-    AUTH_PROVIDERS_CONFIG[AuthProvider.GOOGLE],
-    AUTH_DISCOVERY,
-  );
+  const [, googleResponse, promptGoogleAsync] = useAuthRequest(AUTH_PROVIDERS_CONFIG[AuthProvider.GOOGLE], AUTH_DISCOVERY);
 
   // ✅ Microsoft Auth Hook
-  const [, microsoftResponse, promptMicrosoftAsync] = useAuthRequest(
-    AUTH_PROVIDERS_CONFIG[AuthProvider.MICROSOFT],
-    AUTH_DISCOVERY,
-  );
+  const [, microsoftResponse, promptMicrosoftAsync] = useAuthRequest(AUTH_PROVIDERS_CONFIG[AuthProvider.MICROSOFT], AUTH_DISCOVERY);
 
   // ✅ Handle Google Response
   useEffect(() => {
@@ -63,10 +66,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
   }, [microsoftResponse]);
 
   // Generic Auth Response Handler
-  const handleAuthResponse = async (
-    response: typeof googleResponse,
-    provider: AuthProvider,
-  ) => {
+  const handleAuthResponse = async (response: typeof googleResponse, provider: AuthProvider) => {
     if (response?.type === "success") {
       setIsAuthLoading(true);
       try {
@@ -113,7 +113,19 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const isLoading = isLoadingUserId || isLoadingSalt || isAuthLoading;
 
   const authData: AuthData | null =
-    userId && salt ? { user_id: userId, salt: salt } : null;
+    userId && salt && maxEpoch && provider
+      ? { user_id: userId, salt, provider, max_epoch: Number(maxEpoch), mail: mail ?? null, name: name ?? null, photo_url: photoUrl ?? null }
+      : null;
+
+  const ephemeralData =
+    jwtRandomness && nonce && extendedEphemeralPublicKey && extendedEphemeralPrivateKey
+      ? {
+          jwt_randomness: jwtRandomness,
+          nonce,
+          extended_ephemeral_public_key: extendedEphemeralPublicKey,
+          extended_ephemeral_private_key: extendedEphemeralPrivateKey,
+        }
+      : null;
 
   // ✅ Generic Sign In
   const signIn = async (provider: AuthProvider) => {
@@ -172,6 +184,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         signInWithMicrosoft,
         signOut,
         authData,
+        ephemeralData,
         isLoading,
       }}
     >
