@@ -1,10 +1,10 @@
 import { View, StyleSheet } from "react-native";
-import React from "react";
 import TabBarButton from "./TabBarButton";
 
 const TabBar = ({ state, descriptors, navigation, colorScheme }: any) => {
   const primaryColor = "#0891b2";
   const greyColor = "#737373";
+
   return (
     <View style={styles.tabbar}>
       {state.routes.map((route: any, index: any) => {
@@ -14,6 +14,7 @@ const TabBar = ({ state, descriptors, navigation, colorScheme }: any) => {
         if (["_sitemap", "+not-found"].includes(route.name)) return null;
 
         const isFocused = state.index === index;
+        const badgeCount = options.tabBarBadge ?? 0;
 
         const onPress = () => {
           const event = navigation.emit({
@@ -44,33 +45,9 @@ const TabBar = ({ state, descriptors, navigation, colorScheme }: any) => {
             routeName={route.name}
             color={isFocused ? primaryColor : greyColor}
             label={label}
+            badgeCount={badgeCount}
           />
         );
-
-        // return (
-        //   <TouchableOpacity
-        //     key={route.name}
-        //     style={styles.tabbarItem}
-        //     accessibilityRole="button"
-        //     accessibilityState={isFocused ? { selected: true } : {}}
-        //     accessibilityLabel={options.tabBarAccessibilityLabel}
-        //     testID={options.tabBarTestID}
-        //     onPress={onPress}
-        //     onLongPress={onLongPress}
-        //   >
-        //     {
-        //         icons[route.name]({
-        //             color: isFocused? primaryColor: greyColor
-        //         })
-        //     }
-        //     <Text style={{
-        //         color: isFocused ? primaryColor : greyColor,
-        //         fontSize: 11
-        //     }}>
-        //       {label}
-        //     </Text>
-        //   </TouchableOpacity>
-        // );
       })}
     </View>
   );
