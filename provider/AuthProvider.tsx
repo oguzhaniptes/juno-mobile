@@ -123,7 +123,19 @@ export function SessionProvider({ children }: PropsWithChildren) {
     }
   };
 
-  const isLoading = isLoadingUserId || isLoadingSalt || isAuthLoading;
+  const isLoading =
+    isLoadingUserId ||
+    isLoadingSalt ||
+    isAuthLoading ||
+    isLoadingProvider ||
+    isLoadingName ||
+    isLoadingMail ||
+    isLoadingPhotoUrl ||
+    isLoadingMaxEpoch ||
+    isLoadingRandomness ||
+    isLoadingNonce ||
+    isLoadingPubKey ||
+    isLoadingPrivKey;
 
   const authData: AuthData | null =
     userId && salt && maxEpoch && provider
@@ -180,8 +192,24 @@ export function SessionProvider({ children }: PropsWithChildren) {
       await SecureStore.deleteItemAsync("user_id");
       await SecureStore.deleteItemAsync("salt");
 
+      await SecureStore.deleteItemAsync("provider");
+      await SecureStore.deleteItemAsync("name");
+      await SecureStore.deleteItemAsync("mail");
+      await SecureStore.deleteItemAsync("photo_url");
+      await SecureStore.deleteItemAsync("max_epoch");
+
       setUserId(null);
       setSalt(null);
+      setProvider(null);
+      setName(null);
+      setMail(null);
+      setPhotoUrl(null);
+      setMaxEpoch(null);
+
+      setJwtRandomness(null);
+      setNonce(null);
+      setExtendedEphemeralPublicKey(null);
+      setExtendedEphemeralPrivateKey(null);
 
       console.log("Sign out successful");
     } catch (error) {

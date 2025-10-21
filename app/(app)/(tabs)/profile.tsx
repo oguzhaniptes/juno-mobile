@@ -6,8 +6,9 @@ import React, { useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 
 export default function ProfileScreen() {
-  const { authData, isLoading } = useSession();
+  const { authData, ephemeralData, isLoading, signOut } = useSession();
   console.log("👤 ProfileScreen authData:", authData);
+  console.log("👤 ProfileScreen ephemeralData:", ephemeralData);
   const router = useRouter();
 
   useEffect(() => {
@@ -45,6 +46,11 @@ export default function ProfileScreen() {
               </View>
             </View>
 
+            <TouchableOpacity>
+              <Text style={{ color: "#EF4444", marginTop: 12 }} onPress={signOut}>
+                Sign Out
+              </Text>
+            </TouchableOpacity>
             <View style={styles.statsGrid}>
               <StatBox value={1000} label="Score" />
               <StatBox value={1000} label="Gold" />
