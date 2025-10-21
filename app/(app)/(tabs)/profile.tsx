@@ -1,37 +1,34 @@
 import { LayoutProvider } from "@/components/layout";
 import Avatar from "@/components/ui/avatar";
 import { useSession } from "@/provider/AuthProvider";
-import { getUserAddress } from "@/utils/zk";
 import { jwtToAddress } from "@mysten/sui/zklogin";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 
 export default function ProfileScreen() {
-  const { authData, ephemeralData, isLoading, signOut } = useSession();
-  console.log("👤 ProfileScreen authData:", authData);
-  console.log("👤 ProfileScreen ephemeralData:", ephemeralData);
   const router = useRouter();
-
+  const { authData, ephemeralData, isLoading, signOut } = useSession();
   const [userAddress, setUserAddress] = useState<string | null>(null);
 
   useEffect(() => {
     const init = () => {
+      console.log("👤 ProfileScreen authData:", authData);
+      console.log("👤 ProfileScreen ephemeralData:", ephemeralData);
       if (authData) {
         const address = jwtToAddress(authData.id_token, authData.salt);
-        console.log(address);
         setUserAddress(address);
       }
     };
 
     init();
-  }, [authData]);
+  }, [authData, ephemeralData]);
 
   useEffect(() => {
-    if (!isLoading && !authData) {
+    if (!isLoading && !authData && !ephemeralData) {
       router.push("/sign-in");
     }
-  }, [authData, isLoading, router]);
+  }, [authData, ephemeralData, isLoading, router]);
 
   if (isLoading) {
     return (
@@ -54,10 +51,9 @@ export default function ProfileScreen() {
           <View style={styles.infoWrapper}>
             <View style={styles.userInfoTopRow}>
               <View style={styles.textWrapper}>
-                <Text style={styles.displayNameText}>Mock Name</Text>
-                <Text style={styles.usernameText}>@mockname</Text>
-                <Text style={styles.usernameText}>mail@com</Text>
-                <Text style={styles.joinedText}>Joined 01 01 1970</Text>
+                <Text style={styles.displayNameText}>{authData.name}</Text>
+                <Text style={styles.usernameText}>{authData.mail}</Text>
+                <Text style={styles.usernameText}>{authData.user_id}</Text>
                 <Text style={styles.joinedText}>{userAddress}</Text>
               </View>
             </View>
