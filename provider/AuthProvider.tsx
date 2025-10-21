@@ -90,8 +90,21 @@ export function SessionProvider({ children }: PropsWithChildren) {
         console.log(`${provider} token response:`, data);
 
         if (data.salt && data.user_id) {
+          console.log(`${provider} user authenticated:`, data);
           setUserId(data.user_id);
           setSalt(data.salt);
+          setProvider(provider);
+          setMaxEpoch(data.zk_payload.max_epoch.toString());
+
+          setJwtRandomness(data.zk_payload.jwt_randomness);
+          setNonce(data.zk_payload.nonce);
+          setExtendedEphemeralPublicKey(data.zk_payload.extended_ephemeral_public_key);
+          setExtendedEphemeralPrivateKey(data.zk_payload.extended_ephemeral_private_key);
+
+          if (data.name) setName(data.name);
+          if (data.mail) setMail(data.mail);
+          if (data.photo_url) setPhotoUrl(data.photo_url);
+
           console.log(`${provider} auth successful!`);
         } else {
           console.error(`${provider} auth failed: Missing user_id or salt`);

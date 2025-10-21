@@ -1,14 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Text,
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  useColorScheme,
-  Modal,
-  Pressable,
-  Animated,
-} from "react-native";
+import { Text, View, TouchableOpacity, StyleSheet, useColorScheme, Modal, Pressable, Animated } from "react-native";
 import { useSession } from "@/provider/AuthProvider";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -71,202 +62,78 @@ export default function SignIn() {
   });
 
   return (
-    <Animated.View
-      style={[
-        styles.background,
-        isDark && styles.backgroundDark,
-        { backgroundColor: animatedBackgroundColor },
-      ]}
-    >
+    <Animated.View style={[styles.background, isDark && styles.backgroundDark, { backgroundColor: animatedBackgroundColor }]}>
       <View style={styles.container}>
         <View style={[styles.card, isDark && styles.cardDark]}>
-          <Text style={[styles.title, isDark && styles.titleDark]}>
-            Sign In With
-          </Text>
-          <Text style={[styles.subtitle, isDark && styles.subtitleDark]}>
-            Your Preferred Service
-          </Text>
+          <Text style={[styles.title, isDark && styles.titleDark]}>Sign In With</Text>
+          <Text style={[styles.subtitle, isDark && styles.subtitleDark]}>Your Preferred Service</Text>
 
           <View style={styles.providersContainer}>
             {/* Google */}
-            <TouchableOpacity
-              style={[
-                styles.providerButton,
-                isDark && styles.providerButtonDark,
-              ]}
-              onPress={signInWithGoogle}
-            >
+            <TouchableOpacity style={[styles.providerButton, isDark && styles.providerButtonDark]} onPress={signInWithGoogle}>
               <View style={styles.googleIcon}>
                 <Ionicons name="logo-google" size={28} color="#4285F4" />
               </View>
             </TouchableOpacity>
 
             {/* Twitch */}
-            <TouchableOpacity
-              style={[
-                styles.providerButton,
-                isDark && styles.providerButtonDark,
-              ]}
-              onPress={() => {}}
-            >
+            <TouchableOpacity disabled style={[styles.providerButton, isDark && styles.providerButtonDark]} onPress={() => {}}>
               <View style={styles.twitchIcon}>
                 <Ionicons name="logo-twitch" size={28} color="#9146FF" />
               </View>
             </TouchableOpacity>
 
             {/* Facebook */}
-            <TouchableOpacity
-              style={[
-                styles.providerButton,
-                isDark && styles.providerButtonDark,
-              ]}
-              onPress={() => {}}
-            >
+            <TouchableOpacity disabled style={[styles.providerButton, isDark && styles.providerButtonDark]} onPress={() => {}}>
               <View style={styles.facebookIcon}>
                 <Ionicons name="logo-facebook" size={32} color="#1877F2" />
               </View>
             </TouchableOpacity>
 
             {/* Microsoft */}
-            <TouchableOpacity
-              style={[
-                styles.providerButton,
-                isDark && styles.providerButtonDark,
-              ]}
-              onPress={signInWithMicrosoft}
-            >
+            <TouchableOpacity style={[styles.providerButton, isDark && styles.providerButtonDark]} onPress={signInWithMicrosoft}>
               <View style={styles.microsoftIcon}>
                 <View style={styles.microsoftGrid}>
-                  <View
-                    style={[
-                      styles.microsoftSquare,
-                      { backgroundColor: "#F25022" },
-                    ]}
-                  />
-                  <View
-                    style={[
-                      styles.microsoftSquare,
-                      { backgroundColor: "#7FBA00" },
-                    ]}
-                  />
-                  <View
-                    style={[
-                      styles.microsoftSquare,
-                      { backgroundColor: "#00A4EF" },
-                    ]}
-                  />
-                  <View
-                    style={[
-                      styles.microsoftSquare,
-                      { backgroundColor: "#FFB900" },
-                    ]}
-                  />
+                  <View style={[styles.microsoftSquare, { backgroundColor: "#F25022" }]} />
+                  <View style={[styles.microsoftSquare, { backgroundColor: "#7FBA00" }]} />
+                  <View style={[styles.microsoftSquare, { backgroundColor: "#00A4EF" }]} />
+                  <View style={[styles.microsoftSquare, { backgroundColor: "#FFB900" }]} />
                 </View>
               </View>
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity
-            style={[styles.moreButton, isDark && styles.moreButtonDark]}
-            onPress={openMoreOptions}
-          >
-            <Text
-              style={[
-                styles.moreButtonText,
-                isDark && styles.moreButtonTextDark,
-              ]}
-            >
-              More Options
-            </Text>
+          <TouchableOpacity style={[styles.moreButton, isDark && styles.moreButtonDark]} onPress={openMoreOptions}>
+            <Text style={[styles.moreButtonText, isDark && styles.moreButtonTextDark]}>More Options</Text>
           </TouchableOpacity>
         </View>
 
         {/* Bottom Sheet Modal */}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={showModal}
-          onRequestClose={closeModal}
-        >
+        <Modal animationType="slide" transparent={true} visible={showModal} onRequestClose={closeModal}>
           <View style={styles.modalContainer}>
-            <Animated.View
-              style={[styles.modalOverlay, { opacity: overlayOpacity }]}
-            >
-              <Pressable
-                style={styles.modalOverlayPressable}
-                onPress={closeModal}
-              />
+            <Animated.View style={[styles.modalOverlay, { opacity: overlayOpacity }]}>
+              <Pressable style={styles.modalOverlayPressable} onPress={closeModal} />
             </Animated.View>
-            <Pressable
-              style={[styles.modalContent, isDark && styles.modalContentDark]}
-              onPress={(e) => e.stopPropagation()}
-            >
+            <Pressable style={[styles.modalContent, isDark && styles.modalContentDark]} onPress={(e) => e.stopPropagation()}>
               <View style={styles.modalHandle} />
-              <Text
-                style={[styles.modalTitle, isDark && styles.modalTitleDark]}
-              >
-                More Sign In Options
-              </Text>
+              <Text style={[styles.modalTitle, isDark && styles.modalTitleDark]}>More Sign In Options</Text>
 
               <View style={styles.modalProvidersContainer}>
                 {/* Apple */}
-                <TouchableOpacity
-                  style={[
-                    styles.modalProviderButton,
-                    isDark && styles.modalProviderButtonDark,
-                  ]}
-                  onPress={() => {}}
-                >
-                  <Ionicons
-                    name="logo-apple"
-                    size={24}
-                    color={isDark ? "#fff" : "#000"}
-                  />
-                  <Text
-                    style={[
-                      styles.modalProviderText,
-                      isDark && styles.modalProviderTextDark,
-                    ]}
-                  >
-                    Sign in with Apple
-                  </Text>
+                <TouchableOpacity style={[styles.modalProviderButton, isDark && styles.modalProviderButtonDark]} onPress={() => {}}>
+                  <Ionicons name="logo-apple" size={24} color={isDark ? "#fff" : "#000"} />
+                  <Text style={[styles.modalProviderText, isDark && styles.modalProviderTextDark]}>Sign in with Apple</Text>
                 </TouchableOpacity>
 
                 {/* Discord */}
-                <TouchableOpacity
-                  style={[
-                    styles.modalProviderButton,
-                    isDark && styles.modalProviderButtonDark,
-                  ]}
-                  onPress={() => {}}
-                >
+                <TouchableOpacity style={[styles.modalProviderButton, isDark && styles.modalProviderButtonDark]} onPress={() => {}}>
                   <Ionicons name="logo-discord" size={24} color="#5865F2" />
-                  <Text
-                    style={[
-                      styles.modalProviderText,
-                      isDark && styles.modalProviderTextDark,
-                    ]}
-                  >
-                    Sign in with Discord
-                  </Text>
+                  <Text style={[styles.modalProviderText, isDark && styles.modalProviderTextDark]}>Sign in with Discord</Text>
                 </TouchableOpacity>
               </View>
 
-              <TouchableOpacity
-                style={[
-                  styles.modalCloseButton,
-                  isDark && styles.modalCloseButtonDark,
-                ]}
-                onPress={closeModal}
-              >
-                <Text
-                  style={[
-                    styles.modalCloseButtonText,
-                    isDark && styles.modalCloseButtonTextDark,
-                  ]}
-                >
-                  Cancel
-                </Text>
+              <TouchableOpacity style={[styles.modalCloseButton, isDark && styles.modalCloseButtonDark]} onPress={closeModal}>
+                <Text style={[styles.modalCloseButtonText, isDark && styles.modalCloseButtonTextDark]}>Cancel</Text>
               </TouchableOpacity>
             </Pressable>
           </View>
