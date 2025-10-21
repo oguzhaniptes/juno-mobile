@@ -8,6 +8,7 @@ export enum AuthProvider {
 }
 export interface AuthData {
   user_id: string;
+  id_token: string;
   salt: string;
   provider: string;
   name: string | null;

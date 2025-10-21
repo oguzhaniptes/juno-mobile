@@ -1,8 +1,10 @@
 import { LayoutProvider } from "@/components/layout";
 import Avatar from "@/components/ui/avatar";
 import { useSession } from "@/provider/AuthProvider";
+import { getUserAddress } from "@/utils/zk";
+import { jwtToAddress } from "@mysten/sui/zklogin";
 import { useRouter } from "expo-router";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 
 export default function ProfileScreen() {
@@ -10,6 +12,20 @@ export default function ProfileScreen() {
   console.log("👤 ProfileScreen authData:", authData);
   console.log("👤 ProfileScreen ephemeralData:", ephemeralData);
   const router = useRouter();
+
+  const [userAddress, setUserAddress] = useState<string | null>(null);
+
+  useEffect(() => {
+    const init = () => {
+      if (authData) {
+        const address = jwtToAddress(authData.id_token, authData.salt);
+        console.log(address);
+        setUserAddress(address);
+      }
+    };
+
+    init();
+  }, [authData]);
 
   useEffect(() => {
     if (!isLoading && !authData) {
@@ -42,7 +58,7 @@ export default function ProfileScreen() {
                 <Text style={styles.usernameText}>@mockname</Text>
                 <Text style={styles.usernameText}>mail@com</Text>
                 <Text style={styles.joinedText}>Joined 01 01 1970</Text>
-                <Text style={styles.joinedText}>Wallet: 0x000000</Text>
+                <Text style={styles.joinedText}>{userAddress}</Text>
               </View>
             </View>
 

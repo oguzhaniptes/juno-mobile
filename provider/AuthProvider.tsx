@@ -40,6 +40,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const [[isLoadingMaxEpoch, maxEpoch], setMaxEpoch] = useStorageState("max_epoch");
 
   // Ephemeral Data stored in SessionStorage (per Sui SDK pattern)
+  const [[isLoadingIdToken, idToken], setIdToken] = useSessionStorageState("id_token");
   const [[isLoadingRandomness, jwtRandomness], setJwtRandomness] = useSessionStorageState("jwt_randomness");
   const [[isLoadingNonce, nonce], setNonce] = useSessionStorageState("nonce");
   const [[isLoadingPubKey, extendedEphemeralPublicKey], setExtendedEphemeralPublicKey] = useSessionStorageState("extended_ephemeral_public_key");
@@ -89,13 +90,14 @@ export function SessionProvider({ children }: PropsWithChildren) {
         const data = await resp.json();
         console.log(`${provider} token response:`, data);
 
-        if (data.salt && data.user_id) {
+        if (data.salt && data.user_id && data.id_token) {
           console.log(`${provider} user authenticated:`, data);
           setUserId(data.user_id);
           setSalt(data.salt);
           setProvider(provider);
           setMaxEpoch(data.zk_payload.max_epoch.toString());
 
+          setIdToken(data.id_token);
           setJwtRandomness(data.zk_payload.jwt_randomness);
           setNonce(data.zk_payload.nonce);
           setExtendedEphemeralPublicKey(data.zk_payload.extended_ephemeral_public_key);
@@ -107,7 +109,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
 
           console.log(`${provider} auth successful!`);
         } else {
-          console.error(`${provider} auth failed: Missing user_id or salt`);
+          console.error(`${provider} auth failed: Missing user_id, id_token or salt`);
         }
       } catch (err) {
         console.error(`${provider} sign-in error:`, err);
@@ -135,11 +137,12 @@ export function SessionProvider({ children }: PropsWithChildren) {
     isLoadingRandomness ||
     isLoadingNonce ||
     isLoadingPubKey ||
-    isLoadingPrivKey;
+    isLoadingPrivKey ||
+    isLoadingIdToken;
 
   const authData: AuthData | null =
-    userId && salt && maxEpoch && provider
-      ? { user_id: userId, salt, provider, max_epoch: Number(maxEpoch), mail: mail ?? null, name: name ?? null, photo_url: photoUrl ?? null }
+    userId && salt && maxEpoch && provider && idToken
+      ? { user_id: userId, salt, provider, id_token: idToken, max_epoch: Number(maxEpoch), mail: mail ?? null, name: name ?? null, photo_url: photoUrl ?? null }
       : null;
 
   const ephemeralData =
