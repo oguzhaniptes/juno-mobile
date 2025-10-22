@@ -46,6 +46,7 @@ const AuthContext = createContext<AuthProviderProps>({
   authData: null,
   ephemeralData: null,
   isLoading: false,
+  isEpheremalLoading: false,
 });
 
 // Use this hook to access the user info.
@@ -96,6 +97,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
 
   const isLoading =
     isLoadingUserId || isLoadingSalt || isAuthLoading || isLoadingProvider || isLoadingName || isLoadingMail || isLoadingPhotoUrl || isLoadingMaxEpoch || isLoadingIdToken;
+
+  const isEpheremalLoading = isLoadingRandomness || isLoadingPubKey || isLoadingPrivKey;
 
   // Generic Auth Response Handler
   const handleAuthResponse = useCallback(
@@ -309,6 +312,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         authData,
         ephemeralData,
         isLoading,
+        isEpheremalLoading,
       }}
     >
       {children}

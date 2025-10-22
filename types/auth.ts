@@ -43,4 +43,5 @@ export interface AuthProviderProps {
   authData: AuthData | null;
   ephemeralData: EphemeralData | null;
   isLoading: boolean;
+  isEpheremalLoading: boolean;
 }

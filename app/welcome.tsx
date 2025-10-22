@@ -8,7 +8,7 @@ export default function Welcome() {
   const [currentStep, setCurrentStep] = useState(0);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-  const { ephemeralData } = useSession();
+  const { isEpheremalLoading, ephemeralData } = useSession();
 
   useEffect(() => {
     const logger = () => {
@@ -67,10 +67,8 @@ export default function Welcome() {
             </TouchableOpacity>
           </>
         ) : (
-          <TouchableOpacity style={[styles.button, !ephemeralData && styles.buttonDisabled]} onPress={handleNext} disabled={!ephemeralData}>
-            <Text style={[styles.buttonText, !ephemeralData?.ephemeralPrivateKey && !ephemeralData?.ephemeralPublicKey && !ephemeralData?.randomness && styles.buttonTextDisabled]}>
-              İleri
-            </Text>
+          <TouchableOpacity style={[styles.button, isEpheremalLoading && styles.buttonDisabled]} onPress={handleNext} disabled={!ephemeralData}>
+            <Text style={[styles.buttonText, isEpheremalLoading && styles.buttonTextDisabled]}>İleri</Text>
           </TouchableOpacity>
         )}
       </View>
