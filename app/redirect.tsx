@@ -1,7 +1,4 @@
 import * as Linking from "expo-linking";
-import { useRouter } from "expo-router";
-import * as SecureStore from "expo-secure-store";
-import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 

@@ -1,4 +1,4 @@
-import { use, createContext, type PropsWithChildren, useState, useEffect, useCallback, useRef } from "react";
+import { use, createContext, type PropsWithChildren, useState, useEffect, useCallback } from "react";
 import { useStorageState } from "@/hooks/use-storage-state";
 import { AuthSessionResult, useAuthRequest } from "expo-auth-session";
 import * as SecureStore from "expo-secure-store";
@@ -58,8 +58,6 @@ export function SessionProvider({ children }: PropsWithChildren) {
     [AuthProvider.GOOGLE]: AUTH_PROVIDERS_CONFIG[AuthProvider.GOOGLE],
     [AuthProvider.MICROSOFT]: AUTH_PROVIDERS_CONFIG[AuthProvider.MICROSOFT],
   }));
-
-  const isZkLoginInitializedRef = useRef(false);
 
   const [, googleResponse, promptGoogleAsync] = useAuthRequest(authConfigs[AuthProvider.GOOGLE], AUTH_DISCOVERY);
   const [, microsoftResponse, promptMicrosoftAsync] = useAuthRequest(authConfigs[AuthProvider.MICROSOFT], AUTH_DISCOVERY);
