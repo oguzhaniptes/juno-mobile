@@ -1,11 +1,14 @@
-import { use, createContext, type PropsWithChildren, useState, useEffect } from "react";
+import { use, createContext, type PropsWithChildren, useState, useEffect, useCallback, useRef } from "react";
 import { useStorageState } from "@/hooks/use-storage-state";
-import { useAuthRequest } from "expo-auth-session";
+import { AuthSessionResult, useAuthRequest } from "expo-auth-session";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
 import { AuthData, AuthProvider, AuthProviderProps } from "@/types";
 import { AUTH_DISCOVERY, AUTH_PROVIDERS_CONFIG, BASE_URL } from "@/constants";
 import { useSessionStorageState } from "@/hooks/use-session-storage-state";
+import { EphemeralData, ZkLoginCheckResult } from "@/types/auth";
+import { useSui } from "@/hooks/use-sui";
+import { fetchZkProvider } from "@/utils/zk";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -30,100 +33,36 @@ export function useSession() {
 }
 
 export function SessionProvider({ children }: PropsWithChildren) {
-  // Auth Data stored in SecureStore
-  const [[isLoadingUserId, userId], setUserId] = useStorageState("user_id");
+  const { suiClient } = useSui();
+
+  // ZkLogin Salt & Max Epoch Data stored in SecureStore
   const [[isLoadingSalt, salt], setSalt] = useStorageState("salt");
-  const [[isLoadingProvider, provider], setProvider] = useStorageState("provider");
+  const [[isLoadingMaxEpoch, maxEpoch], setMaxEpoch] = useStorageState("maxEpoch");
+
+  // ZKLogin randomness and Ephemeral Keys stored in SessionSecureStorage
+  const [[isLoadingRandomness, randomness], setRandomness] = useSessionStorageState("randomness");
+  const [[isLoadingPubKey, ephemeralPublicKey], setEphemeralPublicKey] = useSessionStorageState("ephemeralPublicKey");
+  const [[isLoadingPrivKey, ephemeralPrivateKey], setEphemeralPrivateKey] = useSessionStorageState("ephemeralPrivateKey");
+
+  // Additional User Info
+  const [[isLoadingUserId, userId], setUserId] = useStorageState("userId");
+  const [[isLoadingIdToken, idToken], setIdToken] = useStorageState("idToken");
   const [[isLoadingName, name], setName] = useStorageState("name");
   const [[isLoadingMail, mail], setMail] = useStorageState("mail");
-  const [[isLoadingPhotoUrl, photoUrl], setPhotoUrl] = useStorageState("photo_url");
-  const [[isLoadingMaxEpoch, maxEpoch], setMaxEpoch] = useStorageState("max_epoch");
-
-  // Ephemeral Data stored in SessionStorage (per Sui SDK pattern)
-  const [[isLoadingIdToken, idToken], setIdToken] = useSessionStorageState("id_token");
-  const [[isLoadingRandomness, jwtRandomness], setJwtRandomness] = useSessionStorageState("jwt_randomness");
-  const [[isLoadingNonce, nonce], setNonce] = useSessionStorageState("nonce");
-  const [[isLoadingPubKey, extendedEphemeralPublicKey], setExtendedEphemeralPublicKey] = useSessionStorageState("extended_ephemeral_public_key");
-  const [[isLoadingPrivKey, extendedEphemeralPrivateKey], setExtendedEphemeralPrivateKey] = useSessionStorageState("extended_ephemeral_private_key");
+  const [[isLoadingPhotoUrl, photoUrl], setPhotoUrl] = useStorageState("photoUrl");
+  const [[isLoadingProvider, provider], setProvider] = useStorageState("provider");
 
   const [isAuthLoading, setIsAuthLoading] = useState(false);
 
-  // ✅ Google Auth Hook
-  const [, googleResponse, promptGoogleAsync] = useAuthRequest(AUTH_PROVIDERS_CONFIG[AuthProvider.GOOGLE], AUTH_DISCOVERY);
+  const [authConfigs, setAuthConfigs] = useState(() => ({
+    [AuthProvider.GOOGLE]: AUTH_PROVIDERS_CONFIG[AuthProvider.GOOGLE],
+    [AuthProvider.MICROSOFT]: AUTH_PROVIDERS_CONFIG[AuthProvider.MICROSOFT],
+  }));
 
-  // ✅ Microsoft Auth Hook
-  const [, microsoftResponse, promptMicrosoftAsync] = useAuthRequest(AUTH_PROVIDERS_CONFIG[AuthProvider.MICROSOFT], AUTH_DISCOVERY);
+  const isZkLoginInitializedRef = useRef(false);
 
-  // ✅ Handle Google Response
-  useEffect(() => {
-    handleAuthResponse(googleResponse, AuthProvider.GOOGLE);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [googleResponse]);
-
-  // ✅ Handle Microsoft Response
-  useEffect(() => {
-    handleAuthResponse(microsoftResponse, AuthProvider.MICROSOFT);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [microsoftResponse]);
-
-  // Generic Auth Response Handler
-  const handleAuthResponse = async (response: typeof googleResponse, provider: AuthProvider) => {
-    if (response?.type === "success") {
-      setIsAuthLoading(true);
-      try {
-        const { code } = response.params;
-        console.log(`Authenticating with ${provider}...`);
-
-        const resp = await fetch(`${BASE_URL}/api/auth/token`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            provider,
-            code,
-            redirect_uri: `${BASE_URL}/api/auth/callback`,
-            scope: "openid email profile",
-          }),
-        });
-
-        const data = await resp.json();
-        console.log(`${provider} token response:`, data);
-
-        if (data.salt && data.user_id && data.id_token) {
-          console.log(`${provider} user authenticated:`, data);
-          setUserId(data.user_id);
-          setSalt(data.salt);
-          setProvider(provider);
-          setMaxEpoch(data.zk_payload.max_epoch.toString());
-
-          setIdToken(data.id_token);
-          setJwtRandomness(data.zk_payload.jwt_randomness);
-          setNonce(data.zk_payload.nonce);
-          setExtendedEphemeralPublicKey(data.zk_payload.extended_ephemeral_public_key);
-          setExtendedEphemeralPrivateKey(data.zk_payload.extended_ephemeral_private_key);
-
-          if (data.name) setName(data.name);
-          if (data.mail) setMail(data.mail);
-          if (data.photo_url) setPhotoUrl(data.photo_url);
-
-          console.log(`${provider} auth successful!`);
-        } else {
-          console.error(`${provider} auth failed: Missing user_id, id_token or salt`);
-        }
-      } catch (err) {
-        console.error(`${provider} sign-in error:`, err);
-      } finally {
-        setIsAuthLoading(false);
-      }
-    } else if (response?.type === "error") {
-      console.error(`${provider} auth error:`, response.error);
-      setIsAuthLoading(false);
-    } else if (response?.type === "cancel") {
-      console.log(`${provider} auth cancelled by user`);
-      setIsAuthLoading(false);
-    }
-  };
+  const [, googleResponse, promptGoogleAsync] = useAuthRequest(authConfigs[AuthProvider.GOOGLE], AUTH_DISCOVERY);
+  const [, microsoftResponse, promptMicrosoftAsync] = useAuthRequest(authConfigs[AuthProvider.MICROSOFT], AUTH_DISCOVERY);
 
   const isLoading =
     isLoadingUserId ||
@@ -135,31 +74,180 @@ export function SessionProvider({ children }: PropsWithChildren) {
     isLoadingPhotoUrl ||
     isLoadingMaxEpoch ||
     isLoadingRandomness ||
-    isLoadingNonce ||
     isLoadingPubKey ||
     isLoadingPrivKey ||
     isLoadingIdToken;
 
-  const authData: AuthData | null =
-    userId && salt && maxEpoch && provider && idToken
-      ? { user_id: userId, salt, provider, id_token: idToken, max_epoch: Number(maxEpoch), mail: mail ?? null, name: name ?? null, photo_url: photoUrl ?? null }
-      : null;
+  // Generic Auth Response Handler
+  const handleAuthResponse = useCallback(
+    async (response: AuthSessionResult | null, provider: AuthProvider) => {
+      if (response?.type === "success") {
+        setIsAuthLoading(true);
+        try {
+          console.log(response.params);
+          const { code } = response.params;
 
-  const ephemeralData =
-    jwtRandomness && nonce && extendedEphemeralPublicKey && extendedEphemeralPrivateKey
+          console.log(`Authenticating with ${provider}`);
+
+          const resp = await fetch(`${BASE_URL}/api/auth/token`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              provider,
+              code,
+              redirect_uri: `${BASE_URL}/api/auth/callback`,
+              scope: "openid email profile",
+            }),
+          });
+
+          const data = await resp.json();
+          console.log(`${provider} token response:`, data);
+
+          if (data.salt && data.user_id && data.id_token) {
+            console.log(`${provider} user authenticated:`, data);
+            setUserId(data.user_id);
+            setSalt(data.salt);
+            setProvider(provider);
+            setIdToken(data.id_token);
+
+            if (data.name) setName(data.name);
+            if (data.mail) setMail(data.mail);
+            if (data.photo_url) setPhotoUrl(data.photo_url);
+
+            console.log(`${provider} auth successful!`);
+          } else {
+            console.error(`${provider} auth failed: Missing user_id, id_token or salt`);
+          }
+        } catch (err) {
+          console.error(`${provider} sign-in error:`, err);
+        } finally {
+          setIsAuthLoading(false);
+        }
+      } else if (response?.type === "error") {
+        console.error(`${provider} auth error:`, response.error);
+        setIsAuthLoading(false);
+      } else if (response?.type === "cancel") {
+        console.log(`${provider} auth cancelled by user`);
+        setIsAuthLoading(false);
+      }
+    },
+    [setIdToken, setMail, setName, setPhotoUrl, setProvider, setSalt, setUserId]
+  );
+
+  const checkAndRefreshZkLogin = useCallback(async (): Promise<ZkLoginCheckResult> => {
+    try {
+      const { epoch } = await suiClient.getLatestSuiSystemState();
+      const currentEpoch = Number(epoch);
+
+      const isSessionValid = ephemeralPrivateKey && ephemeralPublicKey && randomness && maxEpoch && Number(maxEpoch) >= currentEpoch;
+
+      if (isSessionValid) {
+        console.log(`🔐 Max epoch ${maxEpoch} is still valid (current: ${currentEpoch}). ZKLogin not restarting.`);
+        return { success: true, newNonce: null };
+      }
+
+      console.log("🔐 ZKLogin data missing or invalid, fetching new ZKLogin data.");
+      const zkData = await fetchZkProvider(currentEpoch);
+      console.log("zkdata: ", zkData);
+
+      if (zkData) {
+        const { nonce, maxEpoch, randomness, ephemeralPrivateKey, ephemeralPublicKey } = zkData;
+
+        setRandomness(randomness);
+        setEphemeralPublicKey(ephemeralPublicKey);
+        setEphemeralPrivateKey(ephemeralPrivateKey);
+        setMaxEpoch(maxEpoch.toString());
+
+        setAuthConfigs((prevConfigs) => ({
+          ...prevConfigs,
+          [AuthProvider.GOOGLE]: {
+            ...prevConfigs[AuthProvider.GOOGLE],
+            extraParams: {
+              ...prevConfigs[AuthProvider.GOOGLE].extraParams,
+              nonce,
+            },
+          },
+          [AuthProvider.MICROSOFT]: {
+            ...prevConfigs[AuthProvider.MICROSOFT],
+            extraParams: {
+              ...prevConfigs[AuthProvider.MICROSOFT].extraParams,
+              nonce,
+            },
+          },
+        }));
+
+        console.log("✅ ZKLogin data successfully configured and nonce set.");
+        return { success: true, newNonce: nonce };
+      } else {
+        console.error("❌ Failed to fetch ZKLogin data.");
+        return { success: false, newNonce: null };
+      }
+    } catch (error) {
+      console.error("❌ Error during ZKLogin check/refresh:", error);
+      return { success: false, newNonce: null };
+    }
+  }, [suiClient, ephemeralPrivateKey, ephemeralPublicKey, randomness, maxEpoch, setMaxEpoch, setEphemeralPrivateKey, setEphemeralPublicKey, setRandomness, setAuthConfigs]);
+
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
+    const init = async () => {
+      await checkAndRefreshZkLogin();
+    };
+
+    init();
+  }, [isLoading, checkAndRefreshZkLogin]);
+
+  // Auth Response Handlers
+  useEffect(() => {
+    handleAuthResponse(googleResponse, AuthProvider.GOOGLE);
+  }, [handleAuthResponse, googleResponse]);
+
+  useEffect(() => {
+    handleAuthResponse(microsoftResponse, AuthProvider.MICROSOFT);
+  }, [handleAuthResponse, microsoftResponse]);
+  // ----------------------
+
+  const authData: AuthData | null = userId && salt && provider && idToken ? { userId, salt, provider, idToken, mail: mail!, name: name!, photoUrl: photoUrl! } : null;
+
+  const ephemeralData: EphemeralData | null =
+    randomness && ephemeralPublicKey && ephemeralPrivateKey
       ? {
-          jwt_randomness: jwtRandomness,
-          nonce,
-          extended_ephemeral_public_key: extendedEphemeralPublicKey,
-          extended_ephemeral_private_key: extendedEphemeralPrivateKey,
+          randomness,
+          ephemeralPublicKey,
+          ephemeralPrivateKey,
         }
       : null;
 
   // ✅ Generic Sign In
   const signIn = async (provider: AuthProvider) => {
-    const selectedProvider = provider || AuthProvider.GOOGLE;
+    let nonce = authConfigs[provider].extraParams.nonce;
 
-    switch (selectedProvider) {
+    if (!nonce) {
+      console.warn("⚠️ Nonce is missing. Attempting to regenerate ZKLogin data before proceeding.");
+
+      const { success, newNonce } = await checkAndRefreshZkLogin();
+
+      if (!success) {
+        console.error("❌ Cannot sign in: Failed to obtain required ZKLogin nonce.");
+        return;
+      }
+
+      if (!newNonce) {
+        console.error("❌ Cannot sign in: Nonce still missing after regeneration attempt.");
+        return;
+      }
+
+      nonce = newNonce;
+      console.log(`✅ Nonce successfully regenerated. Proceeding with sign in.`);
+    }
+
+    console.log(`Starting sign in with nonce: ${nonce}...`);
+    switch (provider) {
       case AuthProvider.GOOGLE:
         return signInWithGoogle();
       case AuthProvider.MICROSOFT:
@@ -192,28 +280,34 @@ export function SessionProvider({ children }: PropsWithChildren) {
   // Sign Out
   const signOut = async () => {
     try {
-      await SecureStore.deleteItemAsync("user_id");
       await SecureStore.deleteItemAsync("salt");
+      await SecureStore.deleteItemAsync("maxEpoch");
 
+      await SecureStore.deleteItemAsync("userId");
+      await SecureStore.deleteItemAsync("idToken");
       await SecureStore.deleteItemAsync("provider");
       await SecureStore.deleteItemAsync("name");
       await SecureStore.deleteItemAsync("mail");
-      await SecureStore.deleteItemAsync("photo_url");
-      await SecureStore.deleteItemAsync("max_epoch");
+      await SecureStore.deleteItemAsync("photoUrl");
+      await SecureStore.deleteItemAsync("provider");
+
+      await SecureStore.deleteItemAsync("randomness");
+      await SecureStore.deleteItemAsync("ephemeralPublicKey");
+      await SecureStore.deleteItemAsync("ephemeralPrivateKey");
+
+      setSalt(null);
+      setMaxEpoch(null);
 
       setUserId(null);
-      setSalt(null);
+      setIdToken(null);
       setProvider(null);
       setName(null);
       setMail(null);
       setPhotoUrl(null);
-      setMaxEpoch(null);
 
-      setJwtRandomness(null);
-      setNonce(null);
-      setExtendedEphemeralPublicKey(null);
-      setExtendedEphemeralPrivateKey(null);
-
+      setRandomness(null);
+      setEphemeralPublicKey(null);
+      setEphemeralPrivateKey(null);
       console.log("Sign out successful");
     } catch (error) {
       console.error("Sign out error:", error);

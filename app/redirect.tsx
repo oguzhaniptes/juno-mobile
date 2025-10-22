@@ -6,41 +6,32 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 
 export default function RedirectPage() {
-  const router = useRouter();
-  const [isProcessing, setIsProcessing] = useState(false);
+  // const router = useRouter();
   const [currentUrl, setCurrentUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    WebBrowser.dismissBrowser();
+    // WebBrowser.dismissBrowser();
 
     const handleDeepLink = async (url: string) => {
-      if (isProcessing) return;
-      setIsProcessing(true);
-
-      setCurrentUrl(url); // URL'yi state'e yaz
-      console.log("🔗 Deep Link URL:", url);
-
-      try {
-        const { queryParams } = Linking.parse(url);
-        console.log("📦 Parsed params:", queryParams);
-
-        const salt = await SecureStore.getItemAsync("salt");
-        const userId = await SecureStore.getItemAsync("user_id");
-
-        if (salt && userId) {
-          console.log("✅ Parameters already set, redirecting to home");
-          router.replace("/");
-          return;
-        }
-
-        console.log("❌ Required parameters not found");
-        router.replace("/welcome");
-      } catch (err) {
-        console.error("❌ Redirect handling error:", err);
-        router.replace("/welcome");
-      } finally {
-        setIsProcessing(false);
-      }
+      setCurrentUrl(url);
+      //     console.log("🔗 Deep Link URL:", url);
+      //     try {
+      //       const { queryParams } = Linking.parse(url);
+      //       console.log("📦 Parsed params:", queryParams);
+      //       const salt = await SecureStore.getItemAsync("salt");
+      //       const userId = await SecureStore.getItemAsync("user_id");
+      //       if (salt && userId) {
+      //         console.log("✅ Parameters already set, redirecting to home");
+      //         router.replace("/");
+      //         return;
+      //       }
+      //       console.log("❌ Required parameters not found");
+      //       router.replace("/welcome");
+      //     } catch (err) {
+      //       console.error("❌ Redirect handling error:", err);
+      //       router.replace("/welcome");
+      //     }
+      //   };
     };
 
     const getInitialUrl = async () => {
@@ -51,7 +42,7 @@ export default function RedirectPage() {
     };
 
     getInitialUrl();
-  }, [router, isProcessing]);
+  }, []);
 
   return (
     <View
@@ -71,7 +62,7 @@ export default function RedirectPage() {
           fontWeight: "500",
         }}
       >
-        Giriş yapılıyor...
+        Login in progress...
       </Text>
       {currentUrl && (
         <Text

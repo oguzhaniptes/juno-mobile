@@ -18,7 +18,7 @@ function RootNavigator() {
       <Stack.Protected guard={!authData}>
         <Stack.Screen options={{ headerShown: false }} name="welcome" />
         <Stack.Screen options={{ headerShown: false }} name="sign-in" />
-        <Stack.Screen name="redirect" />
+        <Stack.Screen options={{ headerShown: false }} name="redirect" />
       </Stack.Protected>
     </Stack>
   );

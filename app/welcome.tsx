@@ -1,18 +1,22 @@
-import { useState } from "react";
-import {
-  Text,
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  useColorScheme,
-} from "react-native";
+import { useEffect, useState } from "react";
+import { Text, View, TouchableOpacity, StyleSheet, useColorScheme } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useSession } from "@/provider/AuthProvider";
 
 export default function Welcome() {
   const [currentStep, setCurrentStep] = useState(0);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const { ephemeralData } = useSession();
+
+  useEffect(() => {
+    const logger = () => {
+      console.log("Welcome page: ", ephemeralData);
+    };
+
+    logger();
+  }, [ephemeralData]);
 
   const steps = [
     {
@@ -40,25 +44,14 @@ export default function Welcome() {
   return (
     <View style={[styles.container, isDark && styles.containerDark]}>
       <View style={styles.content}>
-        <Text style={[styles.title, isDark && styles.titleDark]}>
-          {steps[currentStep].title}
-        </Text>
-        <Text style={[styles.description, isDark && styles.descriptionDark]}>
-          {steps[currentStep].description}
-        </Text>
+        <Text style={[styles.title, isDark && styles.titleDark]}>{steps[currentStep].title}</Text>
+        <Text style={[styles.description, isDark && styles.descriptionDark]}>{steps[currentStep].description}</Text>
       </View>
 
       {/* Step Indicators */}
       <View style={styles.indicatorContainer}>
         {steps.map((_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.indicator,
-              isDark && styles.indicatorDark,
-              currentStep === index && styles.activeIndicator,
-            ]}
-          />
+          <View key={index} style={[styles.indicator, isDark && styles.indicatorDark, currentStep === index && styles.activeIndicator]} />
         ))}
       </View>
 
@@ -66,23 +59,18 @@ export default function Welcome() {
       <View style={styles.buttonContainer}>
         {currentStep === steps.length - 1 ? (
           <>
-            <TouchableOpacity
-              style={[styles.backButton, isDark && styles.backButtonDark]}
-              onPress={() => setCurrentStep(0)}
-            >
-              <Ionicons
-                name="arrow-back"
-                size={24}
-                color={isDark ? "#0A84FF" : "#007AFF"}
-              />
+            <TouchableOpacity style={[styles.backButton, isDark && styles.backButtonDark]} onPress={() => setCurrentStep(0)}>
+              <Ionicons name="arrow-back" size={24} color={isDark ? "#0A84FF" : "#007AFF"} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.startButton} onPress={handleNext}>
               <Text style={styles.buttonText}>Başla</Text>
             </TouchableOpacity>
           </>
         ) : (
-          <TouchableOpacity style={styles.button} onPress={handleNext}>
-            <Text style={styles.buttonText}>İleri</Text>
+          <TouchableOpacity style={[styles.button, !ephemeralData && styles.buttonDisabled]} onPress={handleNext} disabled={!ephemeralData}>
+            <Text style={[styles.buttonText, !ephemeralData?.ephemeralPrivateKey && !ephemeralData?.ephemeralPublicKey && !ephemeralData?.randomness && styles.buttonTextDisabled]}>
+              İleri
+            </Text>
           </TouchableOpacity>
         )}
       </View>
@@ -184,5 +172,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "600",
+  },
+  buttonDisabled: {
+    backgroundColor: "#007AFF50", // Ana rengin transparan hali
+    opacity: 0.7,
+  },
+  buttonTextDisabled: {
+    color: "#ffffff80", // Beyazın transparan hali
   },
 });

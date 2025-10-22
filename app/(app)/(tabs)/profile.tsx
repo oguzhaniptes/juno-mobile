@@ -16,7 +16,7 @@ export default function ProfileScreen() {
       console.log("👤 ProfileScreen authData:", authData);
       console.log("👤 ProfileScreen ephemeralData:", ephemeralData);
       if (authData) {
-        const address = jwtToAddress(authData.id_token, authData.salt);
+        const address = jwtToAddress(authData.idToken, authData.salt);
         setUserAddress(address);
       }
     };
@@ -53,7 +53,7 @@ export default function ProfileScreen() {
               <View style={styles.textWrapper}>
                 <Text style={styles.displayNameText}>{authData.name}</Text>
                 <Text style={styles.usernameText}>{authData.mail}</Text>
-                <Text style={styles.usernameText}>{authData.user_id}</Text>
+                <Text style={styles.usernameText}>{authData.userId}</Text>
                 <Text style={styles.joinedText}>{userAddress}</Text>
               </View>
             </View>

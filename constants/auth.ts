@@ -15,14 +15,20 @@ export const AUTH_DISCOVERY = {
   tokenEndpoint: `${BASE_URL}/api/auth/token`,
 };
 
+interface AuthProviderConfig {
+  clientId: string;
+  scopes: string[];
+  redirectUri: string;
+  extraParams: Record<string, string>;
+}
+
 // Provider-specific configurations
-export const AUTH_PROVIDERS_CONFIG = {
+export const AUTH_PROVIDERS_CONFIG: Record<AuthProvider, AuthProviderConfig> = {
   [AuthProvider.GOOGLE]: {
     clientId: AuthProvider.GOOGLE,
     scopes: ["openid", "profile", "email"],
     redirectUri: AUTH_REDIRECT_URI,
     extraParams: {
-      provider: AuthProvider.GOOGLE,
       platform: "mobile",
     },
   },
@@ -31,7 +37,6 @@ export const AUTH_PROVIDERS_CONFIG = {
     scopes: ["openid", "profile", "email"],
     redirectUri: AUTH_REDIRECT_URI,
     extraParams: {
-      provider: AuthProvider.MICROSOFT,
       platform: "mobile",
     },
   },

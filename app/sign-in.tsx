@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { Text, View, TouchableOpacity, StyleSheet, useColorScheme, Modal, Pressable, Animated } from "react-native";
 import { useSession } from "@/provider/AuthProvider";
 import { Ionicons } from "@expo/vector-icons";
+import { AuthProvider } from "@/types";
 
 export default function SignIn() {
-  const { signInWithGoogle, signInWithMicrosoft } = useSession();
+  const { signIn } = useSession();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const [modalVisible, setModalVisible] = useState(false);
@@ -70,7 +71,7 @@ export default function SignIn() {
 
           <View style={styles.providersContainer}>
             {/* Google */}
-            <TouchableOpacity style={[styles.providerButton, isDark && styles.providerButtonDark]} onPress={signInWithGoogle}>
+            <TouchableOpacity style={[styles.providerButton, isDark && styles.providerButtonDark]} onPress={() => signIn(AuthProvider.GOOGLE)}>
               <View style={styles.googleIcon}>
                 <Ionicons name="logo-google" size={28} color="#4285F4" />
               </View>
@@ -91,7 +92,7 @@ export default function SignIn() {
             </TouchableOpacity>
 
             {/* Microsoft */}
-            <TouchableOpacity style={[styles.providerButton, isDark && styles.providerButtonDark]} onPress={signInWithMicrosoft}>
+            <TouchableOpacity style={[styles.providerButton, isDark && styles.providerButtonDark]} onPress={() => signIn(AuthProvider.MICROSOFT)}>
               <View style={styles.microsoftIcon}>
                 <View style={styles.microsoftGrid}>
                   <View style={[styles.microsoftSquare, { backgroundColor: "#F25022" }]} />

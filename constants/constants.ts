@@ -17,22 +17,20 @@ export const REFRESH_TOKEN_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds
 export const REFRESH_BEFORE_EXPIRY_SEC = 60; // Refresh token 1 minute before expiry
 
 // Environment Constants
+export const APP_BASE_URL = "http://0.0.0.0:8081/api/zk/get";
 export const BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 export const APP_SCHEME = "juno://";
 export const JWT_SECRET = process.env.EXPO_PUBLIC_JWT_SECRET;
 
 // Google OAuth Constants
 export const GOOGLE_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID;
-export const GOOGLE_CLIENT_SECRET =
-  process.env.EXPO_PUBLIC_GOOGLE_CLIENT_SECRET;
+export const GOOGLE_CLIENT_SECRET = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_SECRET;
 export const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 
 // Microsoft OAuth Constants
 export const MICROSOFT_CLIENT_ID = process.env.EXPO_PUBLIC_MICROSOFT_CLIENT_ID;
-export const MICROSOFT_CLIENT_SECRET =
-  process.env.EXPO_PUBLIC_MICROSOFT_CLIENT_SECRET;
-export const MICROSOFT_AUTH_URL =
-  "https://login.microsoftonline.com/common/oauth2/v2.0/authorize";
+export const MICROSOFT_CLIENT_SECRET = process.env.EXPO_PUBLIC_MICROSOFT_CLIENT_SECRET;
+export const MICROSOFT_AUTH_URL = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize";
 
 // Cookie Settings
 export const COOKIE_OPTIONS = {
