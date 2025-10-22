@@ -1,7 +1,6 @@
-import { use, createContext, type PropsWithChildren, useState, useEffect, useCallback } from "react";
+import { use, createContext, type PropsWithChildren, useState, useEffect, useCallback, useMemo } from "react";
 import { useStorageState } from "@/hooks/use-storage-state";
-import { AuthSessionResult, useAuthRequest } from "expo-auth-session";
-import * as SecureStore from "expo-secure-store";
+import { AuthSessionResult, AuthRequest, AuthRequestConfig } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import { AuthData, AuthProvider, AuthProviderProps } from "@/types";
 import { AUTH_DISCOVERY, AUTH_PROVIDERS_CONFIG, BASE_URL } from "@/constants";
@@ -11,6 +10,33 @@ import { useSui } from "@/hooks/use-sui";
 import { fetchZkProvider } from "@/utils/zk";
 
 WebBrowser.maybeCompleteAuthSession();
+
+class ZkLoginAuthRequest extends AuthRequest {
+  private getNonce: () => string | null;
+
+  constructor(config: AuthRequestConfig, getNonce: () => string | null) {
+    super(config);
+    this.getNonce = getNonce;
+  }
+
+  // Override to inject nonce dynamically when auth URL is created
+  async getAuthRequestConfigAsync(): Promise<AuthRequestConfig> {
+    const config = await super.getAuthRequestConfigAsync();
+    const nonce = this.getNonce();
+
+    if (nonce) {
+      return {
+        ...config,
+        extraParams: {
+          ...config.extraParams,
+          nonce,
+        },
+      };
+    }
+
+    return config;
+  }
+}
 
 const AuthContext = createContext<AuthProviderProps>({
   signIn: async () => {},
@@ -54,27 +80,22 @@ export function SessionProvider({ children }: PropsWithChildren) {
 
   const [isAuthLoading, setIsAuthLoading] = useState(false);
 
-  const [authConfigs, setAuthConfigs] = useState(() => ({
-    [AuthProvider.GOOGLE]: AUTH_PROVIDERS_CONFIG[AuthProvider.GOOGLE],
-    [AuthProvider.MICROSOFT]: AUTH_PROVIDERS_CONFIG[AuthProvider.MICROSOFT],
-  }));
+  const [currentNonce, setCurrentNonce] = useState<string | null>(null);
 
-  const [, googleResponse, promptGoogleAsync] = useAuthRequest(authConfigs[AuthProvider.GOOGLE], AUTH_DISCOVERY);
-  const [, microsoftResponse, promptMicrosoftAsync] = useAuthRequest(authConfigs[AuthProvider.MICROSOFT], AUTH_DISCOVERY);
+  const googleRequest = useMemo(() => {
+    return new ZkLoginAuthRequest(AUTH_PROVIDERS_CONFIG[AuthProvider.GOOGLE], () => currentNonce);
+  }, [currentNonce]);
+
+  // ✅ Microsoft Auth Request with Custom Class
+  const microsoftRequest = useMemo(() => {
+    return new ZkLoginAuthRequest(AUTH_PROVIDERS_CONFIG[AuthProvider.MICROSOFT], () => currentNonce);
+  }, [currentNonce]);
+
+  const [googleResponse, setGoogleResponse] = useState<AuthSessionResult | null>(null);
+  const [microsoftResponse, setMicrosoftResponse] = useState<AuthSessionResult | null>(null);
 
   const isLoading =
-    isLoadingUserId ||
-    isLoadingSalt ||
-    isAuthLoading ||
-    isLoadingProvider ||
-    isLoadingName ||
-    isLoadingMail ||
-    isLoadingPhotoUrl ||
-    isLoadingMaxEpoch ||
-    isLoadingRandomness ||
-    isLoadingPubKey ||
-    isLoadingPrivKey ||
-    isLoadingIdToken;
+    isLoadingUserId || isLoadingSalt || isAuthLoading || isLoadingProvider || isLoadingName || isLoadingMail || isLoadingPhotoUrl || isLoadingMaxEpoch || isLoadingIdToken;
 
   // Generic Auth Response Handler
   const handleAuthResponse = useCallback(
@@ -158,23 +179,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         setEphemeralPrivateKey(ephemeralPrivateKey);
         setMaxEpoch(maxEpoch.toString());
 
-        setAuthConfigs((prevConfigs) => ({
-          ...prevConfigs,
-          [AuthProvider.GOOGLE]: {
-            ...prevConfigs[AuthProvider.GOOGLE],
-            extraParams: {
-              ...prevConfigs[AuthProvider.GOOGLE].extraParams,
-              nonce,
-            },
-          },
-          [AuthProvider.MICROSOFT]: {
-            ...prevConfigs[AuthProvider.MICROSOFT],
-            extraParams: {
-              ...prevConfigs[AuthProvider.MICROSOFT].extraParams,
-              nonce,
-            },
-          },
-        }));
+        setCurrentNonce(nonce);
 
         console.log("✅ ZKLogin data successfully configured and nonce set.");
         return { success: true, newNonce: nonce };
@@ -186,7 +191,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
       console.error("❌ Error during ZKLogin check/refresh:", error);
       return { success: false, newNonce: null };
     }
-  }, [suiClient, ephemeralPrivateKey, ephemeralPublicKey, randomness, maxEpoch, setMaxEpoch, setEphemeralPrivateKey, setEphemeralPublicKey, setRandomness, setAuthConfigs]);
+  }, [suiClient, ephemeralPrivateKey, ephemeralPublicKey, randomness, maxEpoch, setMaxEpoch, setEphemeralPrivateKey, setEphemeralPublicKey, setRandomness]);
 
   useEffect(() => {
     if (isLoading) {
@@ -208,9 +213,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     handleAuthResponse(microsoftResponse, AuthProvider.MICROSOFT);
   }, [handleAuthResponse, microsoftResponse]);
-  // ----------------------
 
-  const authData: AuthData | null = userId && salt && provider && idToken ? { userId, salt, provider, idToken, mail: mail!, name: name!, photoUrl: photoUrl! } : null;
+  const authData: AuthData | null = userId && salt && provider && idToken ? { userId, salt, provider, idToken, mail, name, photoUrl } : null;
 
   const ephemeralData: EphemeralData | null =
     randomness && ephemeralPublicKey && ephemeralPrivateKey
@@ -222,30 +226,24 @@ export function SessionProvider({ children }: PropsWithChildren) {
       : null;
 
   // ✅ Generic Sign In
-  const signIn = async (provider: AuthProvider) => {
-    let nonce = authConfigs[provider].extraParams.nonce;
-
-    if (!nonce) {
+  const signIn = async (providerType: AuthProvider) => {
+    if (!currentNonce) {
       console.warn("⚠️ Nonce is missing. Attempting to regenerate ZKLogin data before proceeding.");
 
       const { success, newNonce } = await checkAndRefreshZkLogin();
 
-      if (!success) {
+      if (!success || !newNonce) {
         console.error("❌ Cannot sign in: Failed to obtain required ZKLogin nonce.");
         return;
       }
 
-      if (!newNonce) {
-        console.error("❌ Cannot sign in: Nonce still missing after regeneration attempt.");
-        return;
-      }
-
-      nonce = newNonce;
       console.log(`✅ Nonce successfully regenerated. Proceeding with sign in.`);
     }
 
-    console.log(`Starting sign in with nonce: ${nonce}...`);
-    switch (provider) {
+    console.log(`Starting sign in with nonce: ${currentNonce}...`);
+
+    // Prompt the appropriate provider
+    switch (providerType) {
       case AuthProvider.GOOGLE:
         return signInWithGoogle();
       case AuthProvider.MICROSOFT:
@@ -259,7 +257,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const signInWithGoogle = async () => {
     try {
       console.log("Initiating Google sign in...");
-      await promptGoogleAsync();
+      const result = await googleRequest.promptAsync(AUTH_DISCOVERY);
+      setGoogleResponse(result);
     } catch (error) {
       console.error("Google sign in error:", error);
     }
@@ -269,7 +268,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const signInWithMicrosoft = async () => {
     try {
       console.log("Initiating Microsoft sign in...");
-      await promptMicrosoftAsync();
+      const result = await microsoftRequest.promptAsync(AUTH_DISCOVERY);
+      setMicrosoftResponse(result);
     } catch (error) {
       console.error("Microsoft sign in error:", error);
     }
@@ -278,21 +278,6 @@ export function SessionProvider({ children }: PropsWithChildren) {
   // Sign Out
   const signOut = async () => {
     try {
-      await SecureStore.deleteItemAsync("salt");
-      await SecureStore.deleteItemAsync("maxEpoch");
-
-      await SecureStore.deleteItemAsync("userId");
-      await SecureStore.deleteItemAsync("idToken");
-      await SecureStore.deleteItemAsync("provider");
-      await SecureStore.deleteItemAsync("name");
-      await SecureStore.deleteItemAsync("mail");
-      await SecureStore.deleteItemAsync("photoUrl");
-      await SecureStore.deleteItemAsync("provider");
-
-      await SecureStore.deleteItemAsync("randomness");
-      await SecureStore.deleteItemAsync("ephemeralPublicKey");
-      await SecureStore.deleteItemAsync("ephemeralPrivateKey");
-
       setSalt(null);
       setMaxEpoch(null);
 
@@ -306,6 +291,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
       setRandomness(null);
       setEphemeralPublicKey(null);
       setEphemeralPrivateKey(null);
+
+      setCurrentNonce(null);
       console.log("Sign out successful");
     } catch (error) {
       console.error("Sign out error:", error);

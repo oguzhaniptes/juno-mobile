@@ -4,7 +4,7 @@ import { useSession } from "@/provider/AuthProvider";
 import { jwtToAddress } from "@mysten/sui/zklogin";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from "react-native";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -12,16 +12,12 @@ export default function ProfileScreen() {
   const [userAddress, setUserAddress] = useState<string | null>(null);
 
   useEffect(() => {
-    const init = () => {
-      console.log("👤 ProfileScreen authData:", authData);
-      console.log("👤 ProfileScreen ephemeralData:", ephemeralData);
-      if (authData) {
-        const address = jwtToAddress(authData.idToken, authData.salt);
-        setUserAddress(address);
-      }
-    };
-
-    init();
+    console.log("👤 ProfileScreen authData:", authData);
+    console.log("👤 ProfileScreen ephemeralData:", ephemeralData);
+    if (authData) {
+      const address = jwtToAddress(authData.idToken, authData.salt);
+      setUserAddress(address);
+    }
   }, [authData, ephemeralData]);
 
   useEffect(() => {
@@ -40,6 +36,7 @@ export default function ProfileScreen() {
   }
 
   if (!authData) {
+    router.replace("/sign-in");
     return null;
   }
 
@@ -47,7 +44,8 @@ export default function ProfileScreen() {
     <LayoutProvider>
       <View style={styles.profileContentBox}>
         <View style={styles.profileDetailsRow}>
-          <Avatar></Avatar>
+          {authData.photoUrl ? <Image style={{ height: 64, width: 64 }} src={authData.photoUrl} /> : <Avatar />}
+          {/* <Avatar></Avatar> */}
           <View style={styles.infoWrapper}>
             <View style={styles.userInfoTopRow}>
               <View style={styles.textWrapper}>
