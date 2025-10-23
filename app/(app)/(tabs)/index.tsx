@@ -6,6 +6,7 @@ import { feedItems, liveMatches } from "@/mock";
 import { renderFeedItem } from "@/components/Home/FeedCarousel";
 import { FlatList, View, StyleSheet, Text } from "react-native";
 import { GlobalStyles } from "@/styles";
+import CreatePost from "@/components/Home/CreatePost";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -28,6 +29,16 @@ export default function HomeScreen() {
             {liveMatches && <LiveMatchesCarousel liveMatches={liveMatches} navigation={router} />}
 
             <Text style={styles.feedTitle}>Feed</Text>
+
+            <CreatePost
+              onPostCreated={() => {
+                // Yeniden yükleme işlemi
+                // Burada feed verisini yeniden yükleme veya güncelleme işlemi yapılabilir
+              }}
+              onCancel={() => {
+                // İptal işlemi
+              }}
+            />
           </View>
         )}
         ListFooterComponent={<View style={styles.footerSpace} />}

@@ -70,6 +70,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const [[isLoadingRandomness, randomness], setRandomness] = useSessionStorageState("randomness");
   const [[isLoadingPubKey, ephemeralPublicKey], setEphemeralPublicKey] = useSessionStorageState("ephemeralPublicKey");
   const [[isLoadingPrivKey, ephemeralPrivateKey], setEphemeralPrivateKey] = useSessionStorageState("ephemeralPrivateKey");
+  const [[isLoadingNonce, nonce], setNonce] = useSessionStorageState("nonce");
 
   // Additional User Info
   const [[isLoadingUserId, userId], setUserId] = useStorageState("userId");
@@ -81,16 +82,14 @@ export function SessionProvider({ children }: PropsWithChildren) {
 
   const [isAuthLoading, setIsAuthLoading] = useState(false);
 
-  const [currentNonce, setCurrentNonce] = useState<string | null>(null);
-
   const googleRequest = useMemo(() => {
-    return new ZkLoginAuthRequest(AUTH_PROVIDERS_CONFIG[AuthProvider.GOOGLE], () => currentNonce);
-  }, [currentNonce]);
+    return new ZkLoginAuthRequest(AUTH_PROVIDERS_CONFIG[AuthProvider.GOOGLE], () => nonce);
+  }, [nonce]);
 
   // ✅ Microsoft Auth Request with Custom Class
   const microsoftRequest = useMemo(() => {
-    return new ZkLoginAuthRequest(AUTH_PROVIDERS_CONFIG[AuthProvider.MICROSOFT], () => currentNonce);
-  }, [currentNonce]);
+    return new ZkLoginAuthRequest(AUTH_PROVIDERS_CONFIG[AuthProvider.MICROSOFT], () => nonce);
+  }, [nonce]);
 
   const [googleResponse, setGoogleResponse] = useState<AuthSessionResult | null>(null);
   const [microsoftResponse, setMicrosoftResponse] = useState<AuthSessionResult | null>(null);
@@ -98,7 +97,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const isLoading =
     isLoadingUserId || isLoadingSalt || isAuthLoading || isLoadingProvider || isLoadingName || isLoadingMail || isLoadingPhotoUrl || isLoadingMaxEpoch || isLoadingIdToken;
 
-  const isEpheremalLoading = isLoadingRandomness || isLoadingPubKey || isLoadingPrivKey;
+  const isEpheremalLoading = isLoadingRandomness || isLoadingPubKey || isLoadingPrivKey || isLoadingNonce;
 
   // Generic Auth Response Handler
   const handleAuthResponse = useCallback(
@@ -163,7 +162,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
       const { epoch } = await suiClient.getLatestSuiSystemState();
       const currentEpoch = Number(epoch);
 
-      const isSessionValid = ephemeralPrivateKey && ephemeralPublicKey && randomness && maxEpoch && Number(maxEpoch) >= currentEpoch;
+      const isSessionValid = ephemeralPrivateKey && ephemeralPublicKey && randomness && nonce && maxEpoch && Number(maxEpoch) >= currentEpoch;
 
       if (isSessionValid) {
         console.log(`🔐 Max epoch ${maxEpoch} is still valid (current: ${currentEpoch}). ZKLogin not restarting.`);
@@ -182,7 +181,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         setEphemeralPrivateKey(ephemeralPrivateKey);
         setMaxEpoch(maxEpoch.toString());
 
-        setCurrentNonce(nonce);
+        setNonce(nonce);
 
         console.log("✅ ZKLogin data successfully configured and nonce set.");
         return { success: true, newNonce: nonce };
@@ -194,7 +193,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
       console.error("❌ Error during ZKLogin check/refresh:", error);
       return { success: false, newNonce: null };
     }
-  }, [suiClient, ephemeralPrivateKey, ephemeralPublicKey, randomness, maxEpoch, setMaxEpoch, setEphemeralPrivateKey, setEphemeralPublicKey, setRandomness]);
+  }, [suiClient, ephemeralPrivateKey, ephemeralPublicKey, randomness, nonce, maxEpoch, setRandomness, setEphemeralPublicKey, setEphemeralPrivateKey, setMaxEpoch, setNonce]);
 
   useEffect(() => {
     if (isLoading) {
@@ -230,7 +229,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
 
   // ✅ Generic Sign In
   const signIn = async (providerType: AuthProvider) => {
-    if (!currentNonce) {
+    if (!nonce) {
       console.warn("⚠️ Nonce is missing. Attempting to regenerate ZKLogin data before proceeding.");
 
       const { success, newNonce } = await checkAndRefreshZkLogin();
@@ -243,7 +242,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
       console.log(`✅ Nonce successfully regenerated. Proceeding with sign in.`);
     }
 
-    console.log(`Starting sign in with nonce: ${currentNonce}...`);
+    console.log(`Starting sign in with nonce: ${nonce}...`);
 
     // Prompt the appropriate provider
     switch (providerType) {
@@ -295,7 +294,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
       setEphemeralPublicKey(null);
       setEphemeralPrivateKey(null);
 
-      setCurrentNonce(null);
+      setNonce(null);
       console.log("Sign out successful");
     } catch (error) {
       console.error("Sign out error:", error);
