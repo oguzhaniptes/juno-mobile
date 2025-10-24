@@ -1,16 +1,19 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
 import Avatar from "@/components/ui/avatar";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
+import { useSession } from "@/provider/AuthProvider";
 
 const ProfileHeader = () => {
+  const { authData } = useSession();
+
   return (
     <View style={styles.header}>
       <View style={styles.userInfoWrapper}>
-        <Avatar></Avatar>
+        {authData?.photoUrl ? <Image src={authData.photoUrl} style={{ height: 36, width: 36, borderRadius: 28 }}></Image> : <Avatar></Avatar>}
 
         <View>
-          <Text style={styles.welcomeText}>Welcome</Text>
-          <Text style={styles.nameText}>Alex</Text>
+          <Text style={styles.welcomeText}>{authData?.name}</Text>
+          <Text style={styles.nameText}>@{authData?.mail?.slice(0, -27)}</Text>
         </View>
       </View>
 

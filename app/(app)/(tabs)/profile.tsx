@@ -1,5 +1,8 @@
+import { FeedItem } from "@/components/Home/FeedCarousel";
+import PostCard from "@/components/Home/PostCard";
 import { LayoutProvider } from "@/components/layout";
 import Avatar from "@/components/ui/avatar";
+import { BASE_URL } from "@/constants";
 import { useSession } from "@/provider/AuthProvider";
 import { jwtToAddress } from "@mysten/sui/zklogin";
 import { useRouter } from "expo-router";
@@ -10,6 +13,8 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { authData, ephemeralData, isLoading, signOut } = useSession();
   const [userAddress, setUserAddress] = useState<string | null>(null);
+
+  const [userPosts, setUserPosts] = useState<[] | null>(null);
 
   useEffect(() => {
     console.log("👤 ProfileScreen authData:", authData);
@@ -25,6 +30,34 @@ export default function ProfileScreen() {
       router.push("/sign-in");
     }
   }, [authData, ephemeralData, isLoading, router]);
+
+  useEffect(() => {
+    const getMyPost = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/api/db/user-posts`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authData?.idToken}`,
+          },
+        });
+
+        console.log("respon", response);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);
+          setUserPosts(data.data.reverse());
+        } else {
+          console.log("Error.");
+        }
+      } catch (error) {
+        console.log("error", error);
+      }
+    };
+
+    getMyPost();
+  }, [authData]);
 
   if (isLoading) {
     return (
@@ -75,6 +108,25 @@ export default function ProfileScreen() {
           <ActionRow title="Owned Items" subtitle="View your collectibles" onPress={() => router.push("/")} />
           <ActionRow title="Wallet Address" subtitle="Manage wallet" onPress={() => router.push("/")} />
         </View>
+      </View>
+      <View style={{ marginTop: 10, elevation: 8 }}>
+        {userPosts &&
+          userPosts.map((post: FeedItem) => (
+            <PostCard
+              key={post.id}
+              content={post.content ?? "a"}
+              comments_count={post.comments_count}
+              likes_count={post.likes_count}
+              share_count={0}
+              author_id={post.author_id}
+              author_name={post.author_name}
+              created_at={post.created_at}
+              id={post.id}
+              profile_url={post.profile_url}
+              reply_to_id={post.reply_to_id}
+              updated_at={post.updated_at}
+            ></PostCard>
+          ))}
       </View>
     </LayoutProvider>
   );

@@ -3,9 +3,9 @@ import { Stack } from "expo-router";
 import Loading from "@/components/loading";
 
 function RootNavigator() {
-  const { authData, isLoading } = useSession();
+  const { authData, isLoading, isEpheremalLoading } = useSession();
 
-  if (isLoading) {
+  if (isLoading || isEpheremalLoading) {
     return <Loading />;
   }
 
