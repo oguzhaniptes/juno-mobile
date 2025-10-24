@@ -7,20 +7,23 @@ import { renderFeedItem } from "@/components/Home/FeedCarousel";
 import { FlatList, View, StyleSheet, Text, RefreshControl } from "react-native";
 import { GlobalStyles } from "@/styles";
 import CreatePost from "@/components/Home/CreatePost";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BASE_URL } from "@/constants";
+import { useSession } from "@/provider/AuthProvider";
 
 export default function HomeScreen() {
+  const { authData } = useSession();
   const router = useRouter();
   const [feed, setFeed] = useState();
   const [refreshing, setRefreshing] = useState(false);
 
-  const getFeed = async () => {
+  const getFeed = useCallback(async () => {
     try {
       const response = await fetch(`${BASE_URL}/api/db/posts`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${authData?.idToken}`,
         },
       });
       console.log("respon", response);
@@ -34,11 +37,11 @@ export default function HomeScreen() {
     } catch (error) {
       console.log("error", error);
     }
-  };
+  }, [authData?.idToken]);
 
   useEffect(() => {
     getFeed();
-  }, []);
+  }, [getFeed]);
 
   // Pull to refresh fonksiyonu
   const onRefresh = async () => {

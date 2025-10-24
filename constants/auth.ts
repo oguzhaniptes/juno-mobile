@@ -19,7 +19,7 @@ interface AuthProviderConfig {
   clientId: string;
   scopes: string[];
   redirectUri: string;
-  extraParams: Record<string, string>;
+  extraParams?: Record<string, string>;
 }
 
 // Provider-specific configurations
@@ -28,17 +28,11 @@ export const AUTH_PROVIDERS_CONFIG: Record<AuthProvider, AuthProviderConfig> = {
     clientId: AuthProvider.GOOGLE,
     scopes: ["openid", "profile", "email"],
     redirectUri: AUTH_REDIRECT_URI,
-    extraParams: {
-      platform: "mobile",
-    },
   },
   [AuthProvider.MICROSOFT]: {
     clientId: AuthProvider.MICROSOFT,
     scopes: ["openid", "profile", "email"],
     redirectUri: AUTH_REDIRECT_URI,
-    extraParams: {
-      platform: "mobile",
-    },
   },
 };
 

@@ -1,6 +1,9 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, Alert } from "react-native";
 import Avatar from "@/components/ui/avatar";
 import InteractionButtons from "@/components/InteractionButtons";
+import { BASE_URL } from "@/constants";
+import { useState } from "react";
+import { useSession } from "@/provider/AuthProvider";
 
 interface PostCardProps {
   author_id: string;
@@ -14,6 +17,7 @@ interface PostCardProps {
   reply_to_id: string | null;
   updated_at: string | null;
   image_url?: string;
+  is_liked: boolean;
   share_count?: number;
 }
 
@@ -56,9 +60,47 @@ const PostCard = ({
   reply_to_id,
   updated_at,
   image_url,
+  is_liked,
   share_count = 0,
 }: PostCardProps) => {
+  const { authData } = useSession();
   const postTime = timeAgo(created_at);
+  const [liked, setLiked] = useState(is_liked);
+
+  const handleLike = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/db/like-post`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authData?.idToken}`,
+        },
+        body: JSON.stringify({
+          post_id: id,
+        }),
+      });
+
+      console.log(response);
+
+      const data = await response.json();
+
+      console.log(data);
+
+      if (response.ok) {
+        Alert.alert("Success", "Like successfully!");
+        //  setContent("");
+        //  onPostCreated?.();
+        setLiked(true);
+      } else {
+        Alert.alert("Error", data.message || "Failed to create post");
+      }
+    } catch (error) {
+      console.error("Like post error:", error);
+      Alert.alert("Error", "Network error. Please try again.");
+    } finally {
+      //  setIsLoading(false);
+    }
+  };
 
   return (
     <View style={styles.cardContainer}>
@@ -88,7 +130,7 @@ const PostCard = ({
 
       {image_url && <Image source={{ uri: image_url }} style={styles.postImage} resizeMode="cover" />}
 
-      <InteractionButtons likes={likes_count} comments={comments_count} shares={share_count} viewAnaltics={0} />
+      <InteractionButtons isUserLiked={liked} handleLike={handleLike} likes={likes_count} comments={comments_count} shares={share_count} viewAnaltics={0} />
     </View>
   );
 };

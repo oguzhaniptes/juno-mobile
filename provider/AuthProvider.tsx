@@ -8,6 +8,7 @@ import { useSessionStorageState } from "@/hooks/use-session-storage-state";
 import { EphemeralData, ZkLoginCheckResult } from "@/types/auth";
 import { useSui } from "@/hooks/use-sui";
 import { fetchZkProvider } from "@/utils/zk";
+import { Platform } from "react-native";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -24,12 +25,22 @@ class ZkLoginAuthRequest extends AuthRequest {
     const config = await super.getAuthRequestConfigAsync();
     const nonce = this.getNonce();
 
+    let platform: string;
+    if (Platform.OS === "web") {
+      platform = "web";
+    } else if (Platform.OS === "android" || Platform.OS === "macos") {
+      platform = "mobile";
+    } else {
+      platform = "undefined";
+    }
+
     if (nonce) {
       return {
         ...config,
         extraParams: {
           ...config.extraParams,
           nonce,
+          platform,
         },
       };
     }

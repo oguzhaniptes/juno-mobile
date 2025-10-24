@@ -124,6 +124,7 @@ export default function ProfileScreen() {
               id={post.id}
               profile_url={post.profile_url}
               reply_to_id={post.reply_to_id}
+              is_liked={post.is_liked}
               updated_at={post.updated_at}
             ></PostCard>
           ))}

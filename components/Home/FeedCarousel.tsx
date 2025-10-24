@@ -20,6 +20,7 @@ export interface FeedItem {
   category?: string;
   title?: string;
   image_url?: string;
+  is_liked: boolean;
   description?: string;
   cta_text?: string;
   cta_link?: string;
@@ -59,6 +60,7 @@ export const renderFeedItem = ({ item }: { item: FeedItem }) => {
           id={item.id}
           likes_count={item.likes_count}
           profile_url={item.profile_url}
+          is_liked={item.is_liked}
           reply_to_id={item.reply_to_id}
           updated_at={item.updated_at}
           // Note: share_count is not destructured in PostCard, but it's fine for now
@@ -96,6 +98,7 @@ export const renderFeedItem = ({ item }: { item: FeedItem }) => {
         id={item.id}
         likes_count={item.likes_count}
         profile_url={item.profile_url}
+        is_liked={item.is_liked}
         reply_to_id={item.reply_to_id}
         updated_at={item.updated_at}
         // Note: share_count is not destructured in PostCard, but it's fine for now

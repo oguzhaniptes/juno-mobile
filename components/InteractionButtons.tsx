@@ -7,19 +7,22 @@ interface InteractionButtonsProps {
   comments: number;
   shares: number;
   viewAnaltics?: number;
+  isUserLiked: boolean;
+  // functions
+  handleLike: () => void;
 }
 
-const InteractionItem = ({ iconName, count }: any) => (
-  <TouchableOpacity style={styles.interactionItem}>
-    <Feather name={iconName} style={styles.iconStyle} />
+const InteractionItem = ({ iconName, count, onPress, isUserLiked }: any) => (
+  <TouchableOpacity style={styles.interactionItem} onPress={onPress}>
+    <Feather name={iconName} style={[isUserLiked ? styles.likedIcon : styles.iconStyle]} />
     <Text style={styles.countText}>{count}</Text>
   </TouchableOpacity>
 );
 
-const InteractionButtons = ({ likes = 100, comments = 100, shares = 100, viewAnaltics = 100 }: InteractionButtonsProps) => {
+const InteractionButtons = ({ isUserLiked, likes = 100, comments = 100, shares = 100, viewAnaltics = 100, handleLike }: InteractionButtonsProps) => {
   return (
     <View style={styles.container}>
-      <InteractionItem iconName="heart" count={likes} />
+      <InteractionItem onPress={handleLike} isUserLiked={isUserLiked} iconName="heart" count={likes} />
 
       <InteractionItem iconName="message-square" count={comments} />
 
@@ -50,6 +53,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginRight: 4,
     color: "#4B5563",
+  },
+
+  likedIcon: {
+    fontSize: 20,
+    marginRight: 4,
+    color: "#ff0000ff",
   },
 
   countText: {
