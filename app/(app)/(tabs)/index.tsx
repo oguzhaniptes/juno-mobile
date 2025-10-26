@@ -18,6 +18,7 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const getFeed = useCallback(async () => {
+    // console.log("USER ID TOKEN", authData?.idToken);
     try {
       const response = await fetch(`${BASE_URL}/api/db/posts`, {
         method: "GET",
@@ -26,11 +27,10 @@ export default function HomeScreen() {
           Authorization: `Bearer ${authData?.idToken}`,
         },
       });
-      console.log("respon", response);
       if (response.ok) {
         const data = await response.json();
         console.log(data);
-        setFeed(data.data.reverse());
+        setFeed(data.data);
       } else {
         console.log("Error.");
       }

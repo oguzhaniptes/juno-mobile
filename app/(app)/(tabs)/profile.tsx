@@ -42,8 +42,6 @@ export default function ProfileScreen() {
           },
         });
 
-        console.log("respon", response);
-
         if (response.ok) {
           const data = await response.json();
           console.log(data);

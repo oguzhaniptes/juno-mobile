@@ -28,7 +28,7 @@ const CreatePost: React.FC<CreatePostProps> = ({ onPostCreated, onCancel }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${BASE_URL}/api/db/create-post`, {
+      const response = await fetch(`${BASE_URL}/api/db/post`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

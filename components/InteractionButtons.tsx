@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, GestureResponderEvent } from "react-native";
 
 interface InteractionButtonsProps {
   likes: number;
@@ -10,6 +10,7 @@ interface InteractionButtonsProps {
   isUserLiked: boolean;
   // functions
   handleLike: () => void;
+  handleComment: (e: GestureResponderEvent) => void;
 }
 
 const InteractionItem = ({ iconName, count, onPress, isUserLiked }: any) => (
@@ -19,12 +20,12 @@ const InteractionItem = ({ iconName, count, onPress, isUserLiked }: any) => (
   </TouchableOpacity>
 );
 
-const InteractionButtons = ({ isUserLiked, likes = 100, comments = 100, shares = 100, viewAnaltics = 100, handleLike }: InteractionButtonsProps) => {
+const InteractionButtons = ({ isUserLiked, likes = 100, comments = 100, shares = 100, viewAnaltics = 100, handleLike, handleComment }: InteractionButtonsProps) => {
   return (
     <View style={styles.container}>
       <InteractionItem onPress={handleLike} isUserLiked={isUserLiked} iconName="heart" count={likes} />
 
-      <InteractionItem iconName="message-square" count={comments} />
+      <InteractionItem onPress={handleComment} iconName="message-square" count={comments} />
 
       <InteractionItem iconName="share" count={shares} />
 
