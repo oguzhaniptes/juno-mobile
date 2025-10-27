@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useSession } from "@/provider/AuthProvider";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { timeAgo } from "@/utils";
 
 interface PostCardProps {
   author_id: string;
@@ -20,36 +21,10 @@ interface PostCardProps {
   updated_at: string | null;
   image_url?: string;
   is_liked: boolean;
-  share_count?: number;
+  is_reposted: boolean;
+  reposts_count?: number;
   onPostDeleted?: (postId: string) => void;
 }
-
-const timeAgo = (dateString: string): string => {
-  const now = new Date();
-  const past = new Date(dateString);
-  const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
-
-  const minute = 60;
-  const hour = minute * 60;
-  const day = hour * 24;
-  const year = day * 365;
-
-  if (diffInSeconds < minute) {
-    return "Just now";
-  } else if (diffInSeconds < hour) {
-    const minutes = Math.floor(diffInSeconds / minute);
-    return `${minutes}m ago`;
-  } else if (diffInSeconds < day) {
-    const hours = Math.floor(diffInSeconds / hour);
-    return `${hours}h ago`;
-  } else if (diffInSeconds < year) {
-    const days = Math.floor(diffInSeconds / day);
-    return `${days}d ago`;
-  } else {
-    const years = Math.floor(diffInSeconds / year);
-    return `${years}y ago`;
-  }
-};
 
 const PostCard = ({
   author_id,
@@ -64,12 +39,14 @@ const PostCard = ({
   updated_at,
   image_url,
   is_liked,
-  share_count = 0,
+  is_reposted,
+  reposts_count = 100,
   onPostDeleted, // Yeni prop
 }: PostCardProps) => {
   const { authData } = useSession();
   const postTime = timeAgo(created_at);
   const [liked, setLiked] = useState(is_liked);
+  const [resposted, setResposted] = useState(is_reposted);
   const [isModalVisible, setIsModalVisible] = useState(false); // Yeni state
   const [isCommentModalVisible, setIsCommentModalVisible] = useState(false); // ✨ YENİ: Yorum modalı
   const [commentText, setCommentText] = useState(""); // ✨ YENİ: Yorum metni state'i
@@ -84,35 +61,7 @@ const PostCard = ({
     }
   };
 
-  const handleUnlike = async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/api/db/unlike`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authData?.idToken}`,
-        },
-        body: JSON.stringify({
-          post_id: id,
-        }),
-      });
-
-      const data = await response.json();
-      console.log(data);
-
-      if (data.success) {
-        Alert.alert("Success", "Unlike successfully!");
-        setLiked(false);
-      } else {
-        Alert.alert("Error", data.message || "Failed to unlike post");
-      }
-    } catch (error) {
-      console.error("Like post error:", error);
-      Alert.alert("Error", "Network error. Please try again.");
-    }
-  };
-
-  const handleLike = async () => {
+  const toggleLike = async () => {
     try {
       const response = await fetch(`${BASE_URL}/api/db/like`, {
         method: "POST",
@@ -129,8 +78,13 @@ const PostCard = ({
       console.log(data);
 
       if (data.success) {
-        Alert.alert("Success", "Like successfully!");
-        setLiked(true);
+        if (data.message === "Post liked successfully") {
+          Alert.alert("Success", "Like successfully!");
+          setLiked(true);
+        } else if ((data.message = "Post unliked successfully")) {
+          Alert.alert("Success", "Unlile successfully!");
+          setLiked(false);
+        }
       } else {
         Alert.alert("Error", data.message || "Failed to like post");
       }
@@ -140,17 +94,36 @@ const PostCard = ({
     }
   };
 
-  const handleLikeButton = async () => {
-    console.log(is_liked);
+  const toggleRepost = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/db/repost`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authData?.idToken}`,
+        },
+        body: JSON.stringify({
+          post_id: id,
+        }),
+      });
 
-    if (!is_liked) {
-      console.log("liek");
+      const data = await response.json();
+      console.log(data);
 
-      handleLike();
-    } else {
-      console.log("unlike");
-
-      handleUnlike();
+      if (data.success) {
+        if (data.message === "Post reposted successfully") {
+          Alert.alert("Success", "Repost successfully!");
+          setResposted(true);
+        } else if ((data.message = "Post unreposted successfully")) {
+          Alert.alert("Success", "ReRepost successfully!");
+          setResposted(false);
+        }
+      } else {
+        Alert.alert("Error", data.message || "Failed to like post");
+      }
+    } catch (error) {
+      console.error("Like post error:", error);
+      Alert.alert("Error", "Network error. Please try again.");
     }
   };
 
@@ -268,11 +241,13 @@ const PostCard = ({
 
       <InteractionButtons
         isUserLiked={liked}
-        handleLike={handleLikeButton}
+        isUserReposted={resposted}
+        handleLike={toggleLike}
+        handleRepost={toggleRepost}
         handleComment={(e: GestureResponderEvent) => handleCommentButton(e)}
         likes={likes_count}
         comments={comments_count}
-        shares={share_count}
+        reposts={reposts_count}
         viewAnaltics={0}
       />
 

@@ -13,7 +13,7 @@ export interface FeedItem {
   content: string;
   created_at: string;
   likes_count: number;
-  share_count?: number;
+  reposts_count?: number;
   profile_url: string | null;
   reply_to_id: string | null;
   updated_at: string | null;
@@ -21,6 +21,7 @@ export interface FeedItem {
   title?: string;
   image_url?: string;
   is_liked: boolean;
+  is_reposted: boolean;
   description?: string;
   cta_text?: string;
   cta_link?: string;
@@ -40,7 +41,7 @@ export const renderFeedItem = ({ item }: { item: FeedItem }) => {
           imageUrl={item.image_url || ""} // Using image_url
           likes={item.likes_count || 0} // Using snake_case
           comments={item.comments_count || 0} // Using snake_case
-          shares={item.share_count || 0} // Using snake_case
+          shares={item.reposts_count || 0} // Using snake_case
           category={item.category || ""}
           title={item.title || ""}
         />
@@ -61,6 +62,7 @@ export const renderFeedItem = ({ item }: { item: FeedItem }) => {
           likes_count={item.likes_count}
           profile_url={item.profile_url}
           is_liked={item.is_liked}
+          is_reposted={item.is_reposted}
           reply_to_id={item.reply_to_id}
           updated_at={item.updated_at}
           // Note: share_count is not destructured in PostCard, but it's fine for now
@@ -79,7 +81,7 @@ export const renderFeedItem = ({ item }: { item: FeedItem }) => {
           // Ad cards usually don't show likes/comments, but if they do, use the counts
           likes={item.likes_count || 0}
           comments={item.comments_count || 0}
-          shares={item.share_count || 0}
+          shares={item.reposts_count || 0}
           ctaLink={item.cta_link || ""} // Using cta_link
           ctaText={item.cta_text || ""} // Using cta_text
           description={item.description || ""}
@@ -97,8 +99,10 @@ export const renderFeedItem = ({ item }: { item: FeedItem }) => {
         created_at={item.created_at}
         id={item.id}
         likes_count={item.likes_count}
+        reposts_count={item.reposts_count}
         profile_url={item.profile_url}
         is_liked={item.is_liked}
+        is_reposted={item.is_reposted}
         reply_to_id={item.reply_to_id}
         updated_at={item.updated_at}
         // Note: share_count is not destructured in PostCard, but it's fine for now
