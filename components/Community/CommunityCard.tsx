@@ -1,44 +1,67 @@
-// --- HELPER COMPONENT: CommunityCard ---
 import { Image, TouchableOpacity, Platform, View, Text, Linking, StyleSheet } from "react-native";
 
 interface CommunityCardProps {
   name: string;
   members: number;
+  max_member: number;
   description: string;
-  cover: string; // URI
+  cover?: string; // Optional - URI
   onJoin: () => void;
   onPress: () => void;
+  isJoined?: boolean; // Kullanıcı bu community'ye üye mi?
 }
 
-export const CommunityCard: React.FC<CommunityCardProps> = ({ name, members, description, cover, onJoin, onPress }) => (
-  // Ana Kapsayıcı: bg-card rounded-lg shadow-md border border-gray-200 p-4 flex
-  <TouchableOpacity onPress={onPress} style={styles.cardContainer}>
+export const CommunityCard: React.FC<CommunityCardProps> = ({ name, members, max_member, description, cover, onJoin, onPress, isJoined = false }) => (
+  <TouchableOpacity onPress={onPress} style={styles.cardContainer} activeOpacity={0.7}>
     {/* Sol Kısım: Avatar */}
     <View style={styles.cardImageWrapper}>
-      <Image source={{ uri: cover }} style={styles.cardImage} resizeMode="cover" />
+      {cover ? (
+        <Image source={{ uri: cover }} style={styles.cardImage} resizeMode="cover" />
+      ) : (
+        // Fallback: İlk harf ile placeholder
+        <View style={[styles.cardImage, styles.cardImagePlaceholder]}>
+          <Text style={styles.cardImagePlaceholderText}>{name.charAt(0).toUpperCase()}</Text>
+        </View>
+      )}
     </View>
 
-    {/* Orta Kısım: Bilgiler (pr-20'den kaçınmak için flex: 1) */}
+    {/* Orta Kısım: Bilgiler */}
     <View style={styles.cardInfo}>
-      <Text style={styles.cardTitle}>{name}</Text>
-      <Text style={styles.cardMembers}>{members.toLocaleString()} members</Text>
-      {/* line-clamp-2 karşılığı: numberOfLines */}
+      <Text style={styles.cardTitle} numberOfLines={1}>
+        {name}
+      </Text>
+      <Text style={styles.cardMembers}>
+        {members}/{max_member}
+      </Text>
       <Text style={styles.cardDescription} numberOfLines={2}>
-        {description}
+        {description || "No description available"}
       </Text>
     </View>
 
-    {/* Sağ Kısım: Join Butonu (absolute bottom-4 right-4) */}
+    {/* Sağ Kısım: Join/Joined Butonu */}
     <View style={styles.cardButtonWrapper}>
-      <TouchableOpacity onPress={onJoin} style={styles.joinButton}>
-        <Text style={styles.joinButtonText}>Join</Text>
+      <TouchableOpacity
+        onPress={(e) => {
+          e.stopPropagation(); // Parent onPress'i tetiklemesin
+          onJoin();
+        }}
+        style={[styles.joinButton, isJoined && styles.joinedButton]}
+      >
+        <Text style={[styles.joinButtonText, isJoined && styles.joinedButtonText]}>{isJoined ? "Joined" : "Join"}</Text>
       </TouchableOpacity>
     </View>
   </TouchableOpacity>
 );
 
 // --- HELPER FUNCTION: Section Header ---
-export const SectionHeader = ({ title, showAll, onToggle, linkHref }: any) => {
+interface SectionHeaderProps {
+  title: string;
+  showAll?: boolean | null;
+  onToggle: (() => void) | null;
+  linkHref?: string;
+}
+
+export const SectionHeader: React.FC<SectionHeaderProps> = ({ title, showAll, onToggle, linkHref }) => {
   return (
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -47,38 +70,18 @@ export const SectionHeader = ({ title, showAll, onToggle, linkHref }: any) => {
         <TouchableOpacity onPress={onToggle}>
           <Text style={styles.linkText}>{showAll ? "Show less" : "See all"}</Text>
         </TouchableOpacity>
-      ) : (
+      ) : linkHref ? (
         // Explore more Linki
-        <TouchableOpacity onPress={() => Linking.openURL(linkHref)}>
+        <TouchableOpacity onPress={() => console.log(`Navigate to: ${linkHref}`)}>
           <Text style={styles.linkText}>Explore more</Text>
         </TouchableOpacity>
-      )}
+      ) : null}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  screenContainer: {
-    flex: 1,
-    backgroundColor: "#F3F4F6", // Hafif gri arka plan
-  },
-  contentPadding: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-
-  // --- Genel Başlık ---
-  pageMainTitle: {
-    fontSize: 28, // text-3xl
-    fontWeight: "bold",
-    color: "#1F2937", // text-gray-900
-    marginBottom: 24, // mb-6
-  },
-
   // --- Section Stilleri ---
-  section: {
-    marginBottom: 32, // mb-8
-  },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -86,7 +89,7 @@ const styles = StyleSheet.create({
     marginBottom: 12, // mb-3
   },
   sectionTitle: {
-    fontSize: 18, // text-xl'e yakın
+    fontSize: 18, // text-xl
     fontWeight: "600",
     color: "#1F2937", // text-gray-900
   },
@@ -94,11 +97,6 @@ const styles = StyleSheet.create({
     fontSize: 14, // text-sm
     color: "#2563EB", // text-blue-600
     fontWeight: "500",
-  },
-  gridContainer: {
-    // Mobil için tek sütun (grid-cols-1) ve aralık (gap-4)
-    flexDirection: "column",
-    gap: 16, // gap-4
   },
 
   // --- CommunityCard Stilleri ---
@@ -109,10 +107,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E5E7EB", // border-gray-200
     padding: 16, // p-4
-    position: "relative", // Join butonu için
-    // shadow-md
+    position: "relative",
     ...Platform.select({
-      ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 },
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+      },
       android: { elevation: 3 },
     }),
   },
@@ -126,10 +128,19 @@ const styles = StyleSheet.create({
     borderRadius: 8, // rounded-lg
     backgroundColor: "#F3F4F6", // bg-gray-100
   },
+  cardImagePlaceholder: {
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#DBEAFE", // bg-blue-100
+  },
+  cardImagePlaceholderText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#2563EB", // text-blue-600
+  },
   cardInfo: {
     flex: 1,
-    // pr-20 yerine, butonun genişliğini telafi etmek için
-    paddingRight: 60,
+    paddingRight: 60, // Join buton için alan
   },
   cardTitle: {
     fontSize: 16, // text-base
@@ -156,9 +167,13 @@ const styles = StyleSheet.create({
     paddingVertical: 6, // py-1.5
     backgroundColor: "#2563EB", // bg-blue-600
     borderRadius: 6, // rounded-md
-    // shadow-sm
     ...Platform.select({
-      ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.2, shadowRadius: 1 },
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 1,
+      },
       android: { elevation: 2 },
     }),
   },
@@ -166,5 +181,14 @@ const styles = StyleSheet.create({
     fontSize: 14, // text-sm
     color: "white",
     fontWeight: "500",
+  },
+  // Joined state
+  joinedButton: {
+    backgroundColor: "#E5E7EB", // bg-gray-200
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+  },
+  joinedButtonText: {
+    color: "#374151", // text-gray-700
   },
 });
