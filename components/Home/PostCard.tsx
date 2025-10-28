@@ -207,24 +207,33 @@ const PostCard = ({
     setIsCommentModalVisible(true);
   };
 
+  const handleRouteProfile = (e: GestureResponderEvent) => {
+    e.stopPropagation(); // Kartın tıklanmasını engelle
+    router.push(`/user/${author_id}`);
+  };
+
   return (
     <Pressable style={styles.cardContainer} onPress={() => onCardPress(id)}>
       <View style={styles.authorSection}>
         <View style={styles.authorInfoRow}>
-          {profile_url ? <Image style={styles.avatarImage} source={{ uri: profile_url }} /> : <Avatar />}
+          <View style={{ flexDirection: "row" }}>
+            <Pressable onPress={handleRouteProfile}>{profile_url ? <Image style={styles.avatarImage} source={{ uri: profile_url }} /> : <Avatar />}</Pressable>
 
-          <View style={styles.authorTextColumn}>
-            <View style={styles.nameAndTimeRow}>
-              <Text style={styles.nameText} numberOfLines={1}>
-                {author_name || "Anonymous"}
-              </Text>
+            <Pressable onPress={handleRouteProfile} style={{ justifyContent: "flex-start" }}>
+              <View style={styles.authorTextColumn}>
+                <View style={styles.nameAndTimeRow}>
+                  <Text style={styles.nameText} numberOfLines={1}>
+                    {author_name || "Anonymous"}
+                  </Text>
 
-              <Text style={styles.timeText}>• {postTime}</Text>
-            </View>
+                  <Text style={styles.timeText}>• {postTime}</Text>
+                </View>
 
-            <Text style={styles.nicknameText} numberOfLines={1}>
-              @{author_id.slice(0, 10)}
-            </Text>
+                <Text style={styles.nicknameText} numberOfLines={1}>
+                  @{author_id.slice(0, 10)}
+                </Text>
+              </View>
+            </Pressable>
           </View>
 
           <Pressable onPress={() => setIsModalVisible(true)}>
@@ -325,6 +334,7 @@ const styles = StyleSheet.create({
   authorInfoRow: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
   },
 
   avatarImage: {
@@ -336,7 +346,7 @@ const styles = StyleSheet.create({
 
   authorTextColumn: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
   },
 
   nameAndTimeRow: {
