@@ -4,6 +4,7 @@ import { BASE_URL } from "@/constants";
 import { useSession } from "@/provider/AuthProvider";
 import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, StyleSheet, Platform, TouchableOpacity, Modal, TextInput, ScrollView, Switch, Alert, ActivityIndicator } from "react-native";
+import { router } from "expo-router";
 
 // Backend'den gelen community yapısı
 interface Community {
@@ -208,7 +209,7 @@ export default function CommunityPage() {
           <ActivityIndicator size="large" color="#2563EB" />
         </View>
       ) : (
-        <ScrollView>
+        <View>
           {/* --- 1. Your Communities Section --- */}
           {communities.length > 0 && (
             <View>
@@ -225,7 +226,7 @@ export default function CommunityPage() {
                     description={c.description || "No description"}
                     cover={c.photo_url || undefined}
                     onJoin={() => handleJoinCommunity(c.id, c.is_joined)}
-                    onPress={() => console.log(`View ${c.name}`, c)}
+                    onPress={() => router.push(`/community/${c.id}`)}
                   />
                 ))}
               </View>
@@ -242,7 +243,7 @@ export default function CommunityPage() {
               </TouchableOpacity>
             </View>
           )}
-        </ScrollView>
+        </View>
       )}
 
       {/* Create Community Modal */}
