@@ -1,15 +1,17 @@
+// screens/PostDetailScreen.tsx - YENİDEN TASARLANDI
 import { LayoutProvider } from "@/components/layout";
 import { BASE_URL } from "@/constants";
 import { useSession } from "@/provider/AuthProvider";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { View, Text, Modal, Pressable, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Image, TextInput, ScrollView } from "react-native";
+import { View, Text, Modal, Pressable, TouchableOpacity, Alert, ActivityIndicator, Image, TextInput, ScrollView, useColorScheme, Platform } from "react-native";
 import Avatar from "@/components/ui/avatar";
-import InteractionButtons from "@/components/InteractionButtons"; // Kullanılacak
-import { timeAgo } from "@/utils"; // timeAgo fonksiyonunu utils/time'dan import ettiğinizi varsayıyorum
+import InteractionButtons from "@/components/InteractionButtons";
+import { timeAgo } from "@/utils";
+import { Colors, createComponentStyles } from "@/styles";
+import PostCard from "@/components/Home/PostCard";
 
-// --- Post Detail Types (Rust modelinizden geldiği varsayılır) ---
 interface UserInteractionInfo {
   user_id: string;
   user_name: string | null;
@@ -42,34 +44,65 @@ interface PostDetail {
   reposts: UserInteractionInfo[];
   comments: CommentInfo[];
   created_at: string;
-  // Diğer alanlar...
 }
-// -----------------------------------------------------------------
 
-// --- YENİ BİLEŞEN: Kullanıcı listesi için basit kart ---
-const UserCard = ({ user }: { user: UserInteractionInfo }) => (
-  <View style={styles.userCard}>
-    {user.profile_url ? <Image style={styles.avatarImage} source={{ uri: user.profile_url }} /> : <Avatar />}
-    <Text style={styles.nameText}>{user.user_name || "Anonymous"}</Text>
+const UserCard = ({ user, colors }: { user: UserInteractionInfo; colors: any }) => (
+  <View
+    style={{
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    }}
+  >
+    {user.profile_url ? (
+      <Image
+        style={{
+          height: 40,
+          width: 40,
+          borderRadius: 20,
+          marginRight: 12,
+          borderWidth: 2,
+          borderColor: colors.border,
+        }}
+        source={{ uri: user.profile_url }}
+      />
+    ) : (
+      <Avatar />
+    )}
+    <Text
+      style={{
+        fontSize: 16,
+        fontWeight: "600",
+        color: colors.text,
+      }}
+    >
+      {user.user_name || "Anonymous"}
+    </Text>
   </View>
 );
-// --------------------------------------------------------
 
 export default function PostDetailScreen() {
   const { id } = useLocalSearchParams();
   const { authData } = useSession();
-  const [post, setPost] = useState<PostDetail | null>(null); // Tip PostDetail olarak ayarlandı
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const styles = createComponentStyles(isDark);
+  const colors = isDark ? Colors.dark : Colors.light;
+
+  const [post, setPost] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [isMenuModalVisible, setIsMenuModalVisible] = useState(false);
   const [isCommentModalVisible, setIsCommentModalVisible] = useState(false);
-  const [isListModalVisible, setIsListModalVisible] = useState(false); // Yeni: Beğenen/Repost edenler modalı
-  const [listModalType, setListModalType] = useState<"likes" | "reposts" | null>(null); // Modal içeriği
+  const [isListModalVisible, setIsListModalVisible] = useState(false);
+  const [listModalType, setListModalType] = useState<"likes" | "reposts" | null>(null);
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
-  const [isLikedState, setIsLikedState] = useState(false); // is_liked'ı local state'te tut
-  const [isRepostedState, setIsRepostedState] = useState(false); // is_reposted'ı local state'te tut
+  const [isLikedState, setIsLikedState] = useState(false);
+  const [isRepostedState, setIsRepostedState] = useState(false);
 
-  // Gönderi yüklenince state'leri ayarla
   useEffect(() => {
     if (post) {
       setIsLikedState(post.is_liked);
@@ -88,7 +121,6 @@ export default function PostDetailScreen() {
           Authorization: `Bearer ${authData?.idToken}`,
         },
       });
-
       if (response.ok) {
         const data = await response.json();
         setPost(data.data);
@@ -108,10 +140,7 @@ export default function PostDetailScreen() {
     getPostDetail();
   }, [getPostDetail]);
 
-  // --- YENİ ETKİLEŞİM FONKSİYONLARI ---
-
   const toggleLike = async () => {
-    // toggleLike mantığınızı PostCard'dan buraya taşıyın ve post state'ini güncelleyin
     try {
       const response = await fetch(`${BASE_URL}/api/db/like`, {
         method: "POST",
@@ -122,23 +151,19 @@ export default function PostDetailScreen() {
         body: JSON.stringify({ post_id: id }),
       });
       const data = await response.json();
-
       if (data.success) {
-        // State'i güncelle ve detayları yeniden çek (veya optimistik güncelleme yap)
         setIsLikedState((prev) => !prev);
         getPostDetail();
       } else {
-        Alert.alert("Hata", data.message || "Beğeni/Beğeni Kaldırma başarısız.");
+        Alert.alert("Hata", data.message || "Beğeni başarısız.");
       }
     } catch (error) {
       console.log(error);
-
       Alert.alert("Hata", "Ağ hatası.");
     }
   };
 
   const toggleRepost = async () => {
-    // toggleRepost mantığınızı buraya taşıyın
     try {
       const response = await fetch(`${BASE_URL}/api/db/repost`, {
         method: "POST",
@@ -149,15 +174,14 @@ export default function PostDetailScreen() {
         body: JSON.stringify({ post_id: id }),
       });
       const data = await response.json();
-
       if (data.success) {
         setIsRepostedState((prev) => !prev);
         getPostDetail();
       } else {
-        Alert.alert("Hata", data.message || "Repost/Unrepost başarısız.");
+        Alert.alert("Hata", data.message || "Repost başarısız.");
       }
     } catch (error) {
-      Alert.alert("Hata", "Ağ hatası.");
+      Alert.alert(`Hata: ${error}`);
     }
   };
 
@@ -171,7 +195,6 @@ export default function PostDetailScreen() {
       Alert.alert("Lütfen bir yorum yazın.");
       return;
     }
-
     try {
       const response = await fetch(`${BASE_URL}/api/db/comment`, {
         method: "POST",
@@ -184,29 +207,24 @@ export default function PostDetailScreen() {
           content: commentText.trim(),
         }),
       });
-
       if (response.ok) {
         Alert.alert("Başarılı", "Yorumunuz eklendi!");
         setCommentText("");
-        getPostDetail(); // Yorum eklendikten sonra listeyi yenile
+        getPostDetail();
       } else {
         const data = await response.json();
         Alert.alert("Hata", data.message || "Yorum eklenemedi.");
       }
     } catch (error) {
       console.log(error);
-      Alert.alert("Hata", "Yorum gönderilirken ağ hatası oluştu. ");
+      Alert.alert("Hata", "Yorum gönderilirken ağ hatası oluştu.");
     }
   };
 
   const handleDeletePost = async () => {
-    setIsMenuModalVisible(false); // Modalı kapat
-
-    Alert.alert("Gönderiyi Sil", "Bu gönderiyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.", [
-      {
-        text: "İptal",
-        style: "cancel",
-      },
+    setIsMenuModalVisible(false);
+    Alert.alert("Gönderiyi Sil", "Bu gönderiyi silmek istediğinizden emin misiniz?", [
+      { text: "İptal", style: "cancel" },
       {
         text: "Sil",
         style: "destructive",
@@ -218,19 +236,15 @@ export default function PostDetailScreen() {
                 Authorization: `Bearer ${authData?.idToken}`,
               },
             });
-
             const data = await response.json();
-
             if (response.ok) {
-              Alert.alert("Başarılı", "Gönderi başarıyla silindi.");
-              // Silme başarılı olduğunda üst bileşene haber ver
-              // onPostDeleted?.(id);
+              Alert.alert("Başarılı", "Gönderi silindi.");
             } else {
               Alert.alert("Hata", data.message || "Gönderi silinemedi.");
             }
           } catch (error) {
             console.error("Delete post error:", error);
-            Alert.alert("Hata", "Ağ hatası. Lütfen tekrar deneyin.");
+            Alert.alert("Hata", "Ağ hatası.");
           }
         },
       },
@@ -239,9 +253,6 @@ export default function PostDetailScreen() {
 
   const handleDeleteComment = async () => {
     if (!selectedCommentId || !authData) return;
-
-    // Alert ile onay almayı unutmayın!
-
     try {
       const response = await fetch(`${BASE_URL}/api/db/comment/${selectedCommentId}`, {
         method: "DELETE",
@@ -250,11 +261,9 @@ export default function PostDetailScreen() {
           Authorization: `Bearer ${authData.idToken}`,
         },
       });
-
       const data = await response.json();
-
       if (response.ok) {
-        Alert.alert("Başarılı", "Yorum başarıyla silindi.");
+        Alert.alert("Başarılı", "Yorum silindi.");
         setIsCommentModalVisible(false);
         getPostDetail();
       } else {
@@ -277,13 +286,13 @@ export default function PostDetailScreen() {
     }
   };
 
-  // --- YÜKLEME VE HATA EKRANLARI ---
-
   if (loading) {
     return (
       <LayoutProvider>
-        <ActivityIndicator size="large" color="#3B82F6" style={{ marginTop: 50 }} />
-        <Text style={{ textAlign: "center", marginTop: 10 }}>Gönderi yükleniyor...</Text>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={{ color: colors.textSecondary, marginTop: 16 }}>Yükleniyor...</Text>
+        </View>
       </LayoutProvider>
     );
   }
@@ -291,152 +300,174 @@ export default function PostDetailScreen() {
   if (!post) {
     return (
       <LayoutProvider>
-        <Text style={{ textAlign: "center", marginTop: 50, fontSize: 18 }}>Gönderi bulunamadı veya bir hata oluştu.</Text>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
+          <Ionicons name="alert-circle-outline" size={64} color={colors.textSecondary} />
+          <Text
+            style={{
+              textAlign: "center",
+              marginTop: 16,
+              fontSize: 18,
+              color: colors.text,
+            }}
+          >
+            Gönderi bulunamadı
+          </Text>
+        </View>
       </LayoutProvider>
     );
   }
 
-  // --- RENDER FONKSİYONU ---
-
   return (
     <LayoutProvider>
-      <View style={styles.cardContainer}>
-        <View style={styles.authorSection}>
-          <View style={styles.authorInfoRow}>
-            {post.profile_url ? <Image style={styles.avatarImage} source={{ uri: post.profile_url }} /> : <Avatar />}
+      <PostCard
+        isDetail={true}
+        author_id={post.author_id}
+        author_name={post.author_name}
+        comments_count={post.comments_count}
+        content={post.content}
+        created_at={post.created_at}
+        id={post.id}
+        is_liked={post.is_liked}
+        is_reposted={post.is_reposted}
+        likes_count={post.likes_count}
+        profile_url={post.profile_url}
+        reply_to_id={"nuil"}
+        updated_at={"none"}
+        image_url={""}
+      ></PostCard>
 
-            <View style={styles.authorTextColumn}>
-              <View style={styles.nameAndTimeRow}>
-                <Text style={styles.nameText} numberOfLines={1}>
-                  {post.author_name || "Anonymous"}
-                </Text>
-                <Text style={styles.timeText}>• {timeAgo(post.created_at)}</Text>
-              </View>
-
-              <Text style={styles.nicknameText} numberOfLines={1}>
-                @{post.author_id.slice(0, 10)}
-              </Text>
-            </View>
-
-            <Pressable onPress={() => setIsMenuModalVisible(true)}>
-              <Ionicons name="ellipsis-vertical" size={20} color="#6B7280" />
-            </Pressable>
-          </View>
-
-          <View style={styles.postContentContainer}>
-            <Text style={styles.postContentText}>{post.content}</Text>
-          </View>
-        </View>
-
-        {/* Post Detayında görsel varsa buraya eklenebilir (API'dan image_url geliyorsa) */}
-        {/* image_url && <Image source={{ uri: image_url }} style={styles.postImage} resizeMode="cover" /> */}
-
-        {/* ETKİLEŞİM BUTONLARI */}
-        <InteractionButtons
-          isUserLiked={isLikedState}
-          isUserReposted={isRepostedState}
-          handleLike={toggleLike}
-          handleRepost={toggleRepost}
-          handleComment={() => {}} // Yorum modalı açma logic'i direkt yorum alanına bağlanabilir
-          likes={post.likes_count}
-          comments={post.comments_count}
-          reposts={post.reposts_count}
-          viewAnaltics={0}
-        />
+      {/* Stats Section */}
+      <View style={[styles.postStatsSection, { borderTopColor: colors.border }]}>
+        <TouchableOpacity onPress={() => handleOpenUserListModal("reposts")}>
+          <Text style={{ color: colors.textSecondary }}>
+            <Text style={{ fontWeight: "700", color: colors.text }}>{post.reposts_count}</Text> Reposts
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleOpenUserListModal("likes")}>
+          <Text style={{ color: colors.textSecondary }}>
+            <Text style={{ fontWeight: "700", color: colors.text }}>{post.likes_count}</Text> Likes
+          </Text>
+        </TouchableOpacity>
       </View>
 
-      {/* BOTTOM SHEET MODAL */}
+      {/* Comment Input Section */}
+      <View
+        style={[
+          styles.commentInputCard,
+          {
+            backgroundColor: Platform.OS === "android" ? colors.cardBgSolid : colors.cardBg,
+          },
+        ]}
+      >
+        <TextInput
+          style={[
+            styles.commentInputField,
+            {
+              backgroundColor: Platform.OS === "android" ? (isDark ? "#2D2440" : "#F9FAFB") : colors.surface,
+              borderColor: colors.border,
+              color: colors.text,
+            },
+          ]}
+          placeholder="Bir yorum yazın..."
+          placeholderTextColor={colors.textSecondary}
+          value={commentText}
+          onChangeText={setCommentText}
+          multiline
+        />
+        <TouchableOpacity
+          style={[styles.commentSubmitButton, { backgroundColor: colors.primary }, commentText.trim() === "" && { opacity: 0.5 }]}
+          onPress={handleSendComment}
+          disabled={commentText.trim() === ""}
+        >
+          <Text style={styles.commentSubmitText}>Yorum Yap</Text>
+          <Ionicons name="send" size={16} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Comments Section */}
+      <View style={{ marginTop: 16, marginBottom: 20 }}>
+        {/* <Text style={[styles.commentsHeader, { color: colors.text }]}>Yorumlar ({post.comments_count})</Text> */}
+        {post.comments.map((comment: CommentInfo) => {
+          const isCommentOwner = comment.user_id === authData?.userId;
+          return (
+            <View
+              key={comment.id}
+              style={[
+                styles.commentCard,
+                {
+                  backgroundColor: Platform.OS === "android" ? colors.cardBgSolid : colors.cardBg,
+                  borderColor: colors.border,
+                },
+              ]}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                <Avatar />
+                <View style={{ marginLeft: 8, flex: 1 }}>
+                  <Text style={{ fontWeight: "700", color: colors.text }}>{comment.user_name || "Bilinmeyen Kullanıcı"}</Text>
+                  <Text style={{ fontSize: 12, color: colors.textSecondary }}>{timeAgo(comment.created_at)}</Text>
+                </View>
+                {isCommentOwner && (
+                  <Pressable onPress={() => handleOpenCommentMenu(comment.id, comment.user_id)} style={{ padding: 5 }}>
+                    <Ionicons name="ellipsis-vertical" size={20} color={colors.textSecondary} />
+                  </Pressable>
+                )}
+              </View>
+              <Text style={{ color: colors.text, lineHeight: 20 }}>{comment.content}</Text>
+            </View>
+          );
+        })}
+      </View>
+
+      {/* Modals */}
+      {/* Post Menu Modal */}
       <Modal animationType="slide" transparent={true} visible={isMenuModalVisible} onRequestClose={() => setIsMenuModalVisible(false)}>
-        <Pressable style={styles.modalContainer} onPress={() => setIsMenuModalVisible(false)}>
-          <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
-            <View style={styles.modalHandle} />
-
-            <Text style={styles.modalTitle}>Gönderi Seçenekleri</Text>
-
-            {/* SİLME SEÇENEĞİ */}
+        <Pressable style={styles.modalOverlay} onPress={() => setIsMenuModalVisible(false)}>
+          <Pressable style={[styles.modalSheet, { backgroundColor: colors.cardBgSolid }]} onPress={(e) => e.stopPropagation()}>
+            <View style={[styles.modalHandle, { backgroundColor: colors.border }]} />
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Gönderi Seçenekleri</Text>
             {isPostOwner && (
-              <TouchableOpacity style={styles.modalOptionButton} onPress={handleDeletePost}>
+              <TouchableOpacity style={styles.modalDeleteButton} onPress={handleDeletePost}>
                 <Ionicons name="trash-outline" size={24} color="#EF4444" />
-                <Text style={styles.modalOptionTextDanger}>Gönderiyi Sil</Text>
+                <Text style={styles.modalDeleteText}>Gönderiyi Sil</Text>
               </TouchableOpacity>
             )}
-
-            {/* İPTAL BUTONU */}
-            <TouchableOpacity style={styles.modalCloseButton} onPress={() => setIsMenuModalVisible(false)}>
-              <Text style={styles.modalCloseButtonText}>İptal</Text>
+            <TouchableOpacity style={[styles.modalCancelButton, { backgroundColor: colors.surface }]} onPress={() => setIsMenuModalVisible(false)}>
+              <Text style={[styles.modalCancelText, { color: colors.text }]}>İptal</Text>
             </TouchableOpacity>
           </Pressable>
         </Pressable>
       </Modal>
 
-      {/* BEĞENENLER / REPOST EDENLER SAYACI (Tıklanabilir) */}
-      <View style={styles.countsContainer}>
-        <TouchableOpacity onPress={() => handleOpenUserListModal("reposts")}>
-          <Text style={styles.countLinkText}>
-            <Text style={{ fontWeight: "bold" }}>{post.reposts_count}</Text> Reposts
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleOpenUserListModal("likes")}>
-          <Text style={styles.countLinkText}>
-            <Text style={{ fontWeight: "bold" }}>{post.likes_count}</Text> Likes
-          </Text>
-        </TouchableOpacity>
-      </View>
+      {/* Comment Delete Modal */}
+      <Modal animationType="slide" transparent={true} visible={isCommentModalVisible} onRequestClose={() => setIsCommentModalVisible(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setIsCommentModalVisible(false)}>
+          <Pressable style={[styles.modalSheet, { backgroundColor: colors.cardBgSolid }]} onPress={(e) => e.stopPropagation()}>
+            <View style={[styles.modalHandle, { backgroundColor: colors.border }]} />
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Yorum Seçenekleri</Text>
+            <TouchableOpacity style={styles.modalDeleteButton} onPress={handleDeleteComment}>
+              <Ionicons name="trash-outline" size={24} color="#EF4444" />
+              <Text style={styles.modalDeleteText}>Yorumu Sil</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.modalCancelButton, { backgroundColor: colors.surface }]} onPress={() => setIsCommentModalVisible(false)}>
+              <Text style={[styles.modalCancelText, { color: colors.text }]}>İptal</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
-      <View style={styles.separator} />
-
-      {/* YORUM EKLEME ALANI */}
-      <View style={styles.commentInputContainer}>
-        <TextInput style={styles.commentInput} placeholder="Bir yorum yazın..." placeholderTextColor="#9CA3AF" value={commentText} onChangeText={setCommentText} multiline={true} />
-        <TouchableOpacity style={[styles.commentSendButton, commentText.trim() === "" && { opacity: 0.5 }]} onPress={handleSendComment} disabled={commentText.trim() === ""}>
-          <Text style={styles.commentSendButtonText}>Yorum Yap</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* YORUMLAR LİSTESİ */}
-      <Text style={styles.commentHeader}>Yorumlar ({post.comments_count})</Text>
-      {post.comments.map((comment: CommentInfo) => {
-        const isCommentOwner = comment.user_id === authData?.userId;
-        return (
-          <View key={comment.id} style={styles.commentCard}>
-            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
-              <Avatar />
-              <Text style={{ fontWeight: "bold", marginLeft: 8 }}>{comment.user_name || "Bilinmeyen Kullanıcı"}</Text>
-              <Text style={styles.timeText}>• {timeAgo(comment.created_at)}</Text>
-            </View>
-            <View style={styles.commentContentRow}>
-              <Text style={{ flex: 1 }}>{comment.content}</Text>
-              {isCommentOwner && (
-                <Pressable onPress={() => handleOpenCommentMenu(comment.id, comment.user_id)} style={{ padding: 5 }}>
-                  <Ionicons name="ellipsis-vertical" size={20} color="#6B7280" />
-                </Pressable>
-              )}
-            </View>
-          </View>
-        );
-      })}
-
-      {/* 1. POST SİLME MODALI */}
-      {/* ... (Post Silme Modalınız aynı kalır) ... */}
-
-      {/* 2. YORUM SİLME MODALI */}
-      {/* ... (Yorum Silme Modalınız aynı kalır) ... */}
-
-      {/* 3. KULLANICI LİSTESİ MODALI (Beğenenler/Repost Edenler) */}
+      {/* User List Modal */}
       <Modal animationType="slide" transparent={true} visible={isListModalVisible} onRequestClose={() => setIsListModalVisible(false)}>
-        <Pressable style={styles.modalContainer} onPress={() => setIsListModalVisible(false)}>
-          <Pressable style={styles.listModalContent} onPress={(e) => e.stopPropagation()}>
-            <View style={styles.modalHandle} />
-            <Text style={styles.modalTitle}>{listModalType === "likes" ? "Beğenenler" : "Repost Edenler"}</Text>
-
+        <Pressable style={styles.modalOverlay} onPress={() => setIsListModalVisible(false)}>
+          <Pressable style={[styles.userListModal, { backgroundColor: colors.cardBgSolid }]} onPress={(e) => e.stopPropagation()}>
+            <View style={[styles.modalHandle, { backgroundColor: colors.border }]} />
+            <Text style={[styles.modalTitle, { color: colors.text }]}>{listModalType === "likes" ? "Beğenenler" : "Repost Edenler"}</Text>
             <ScrollView style={{ maxHeight: 400 }}>
               {(listModalType === "likes" ? post?.likes : post?.reposts)?.map((user: UserInteractionInfo) => (
-                <UserCard key={user.user_id} user={user} />
+                <UserCard key={user.user_id} user={user} colors={colors} />
               ))}
             </ScrollView>
-
-            <TouchableOpacity style={styles.modalCloseButton} onPress={() => setIsListModalVisible(false)}>
-              <Text style={styles.modalCloseButtonText}>Kapat</Text>
+            <TouchableOpacity style={[styles.modalCancelButton, { backgroundColor: colors.surface }]} onPress={() => setIsListModalVisible(false)}>
+              <Text style={[styles.modalCancelText, { color: colors.text }]}>Kapat</Text>
             </TouchableOpacity>
           </Pressable>
         </Pressable>
@@ -444,206 +475,3 @@ export default function PostDetailScreen() {
     </LayoutProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  cardContainer: {
-    backgroundColor: "white",
-    borderRadius: 8,
-    elevation: 3,
-    padding: 15,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    marginBottom: 10,
-  },
-
-  // ... (Mevcut stiller)
-  authorSection: {
-    marginBottom: 16,
-  },
-
-  authorInfoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  avatarImage: {
-    height: 36,
-    width: 36,
-    borderRadius: 18,
-    marginRight: 8,
-  },
-  authorTextColumn: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  nameAndTimeRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  nameText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1F2937",
-    marginRight: 4,
-  },
-  nicknameText: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-
-  timeText: {
-    fontSize: 14,
-    color: "#6B7280",
-  },
-  postContentContainer: {
-    width: "100%",
-    marginTop: 8,
-  },
-  postContentText: {
-    color: "#374151",
-    fontSize: 14,
-    marginBottom: 12,
-    lineHeight: 20,
-  },
-
-  // Counts Section
-  countsContainer: {
-    flexDirection: "row",
-    gap: 15,
-    paddingVertical: 10,
-    paddingHorizontal: 5,
-  },
-  countLinkText: {
-    fontSize: 15,
-    color: "#4B5563",
-  },
-  separator: {
-    height: 1,
-    backgroundColor: "#E5E7EB",
-    marginBottom: 10,
-  },
-
-  // Comment Input Styles
-  commentInputContainer: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-    marginBottom: 10,
-  },
-  commentInput: {
-    height: 60,
-    borderColor: "#D1D5DB",
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 16,
-    color: "#1F2937",
-    textAlignVertical: "top",
-    marginBottom: 10,
-  },
-  commentSendButton: {
-    backgroundColor: "#3B82F6",
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  commentSendButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-
-  // Comments List Styles
-  commentHeader: {
-    fontSize: 18,
-    fontWeight: "bold",
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-  },
-  commentCard: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
-  },
-  commentContentRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 5,
-  },
-
-  // User Card for Modal
-  userCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
-  },
-
-  // Modal Styles
-  modalContainer: {
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 20,
-    paddingBottom: 40,
-    width: "100%",
-  },
-  listModalContent: {
-    // Kullanıcı listesi için daha kısa modal
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 20,
-    width: "100%",
-    maxHeight: "80%",
-  },
-  modalHandle: {
-    width: 40,
-    height: 5,
-    backgroundColor: "#ddd",
-    borderRadius: 3,
-    alignSelf: "center",
-    marginBottom: 20,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    textAlign: "center",
-    color: "#1F2937",
-    marginBottom: 20,
-  },
-  modalCloseButton: {
-    backgroundColor: "#F3F4F6",
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  modalCloseButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#4B5563",
-  },
-  modalOptionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FEE2E2",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 10,
-    gap: 12,
-  },
-  modalOptionTextDanger: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#EF4444",
-  },
-});

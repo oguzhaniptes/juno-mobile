@@ -1,3 +1,5 @@
+// screens/ProfileScreen.tsx - YENİDEN TASARLANDI
+import { View, Text, TouchableOpacity, ActivityIndicator, Image, useColorScheme, Platform, ScrollView } from "react-native";
 import { FeedItem } from "@/components/Home/FeedCarousel";
 import PostCard from "@/components/Home/PostCard";
 import { LayoutProvider } from "@/components/layout";
@@ -7,18 +9,22 @@ import { useSession } from "@/provider/AuthProvider";
 import { jwtToAddress } from "@mysten/sui/zklogin";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from "react-native";
+import { Colors, createComponentStyles } from "@/styles";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { authData, ephemeralData, isLoading, signOut } = useSession();
-  const [userAddress, setUserAddress] = useState<string | null>(null);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const styles = createComponentStyles(isDark);
+  const colors = isDark ? Colors.dark : Colors.light;
 
+  const [userAddress, setUserAddress] = useState<string | null>(null);
   const [userPosts, setUserPosts] = useState<[] | null>(null);
 
   useEffect(() => {
-    console.log("👤 ProfileScreen authData:", authData);
-    console.log("👤 ProfileScreen ephemeralData:", ephemeralData);
     if (authData) {
       const address = jwtToAddress(authData.idToken, authData.salt);
       setUserAddress(address);
@@ -44,10 +50,7 @@ export default function ProfileScreen() {
 
         if (response.ok) {
           const data = await response.json();
-          console.log(data);
           setUserPosts(data.data.reverse());
-        } else {
-          console.log("Error.");
         }
       } catch (error) {
         console.log("error", error);
@@ -59,9 +62,16 @@ export default function ProfileScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2563EB" />
-        <Text style={styles.loadingText}>Loading...</Text>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: colors.background,
+        }}
+      >
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={{ color: colors.textSecondary, marginTop: 16 }}>Loading...</Text>
       </View>
     );
   }
@@ -73,233 +83,259 @@ export default function ProfileScreen() {
 
   return (
     <LayoutProvider>
-      <View style={styles.profileContentBox}>
-        <View style={styles.profileDetailsRow}>
-          {authData.photoUrl ? <Image style={{ height: 64, width: 64 }} src={authData.photoUrl} /> : <Avatar />}
-          {/* <Avatar></Avatar> */}
-          <View style={styles.infoWrapper}>
-            <View style={styles.userInfoTopRow}>
-              <View style={styles.textWrapper}>
-                <Text style={styles.displayNameText}>{authData.name}</Text>
-                <Text style={styles.usernameText}>{authData.mail}</Text>
-                <Text style={styles.usernameText}>{authData.userId}</Text>
-                <Text style={styles.joinedText}>{userAddress}</Text>
-              </View>
+      {/* Profile Header Card */}
+      <View
+        style={[
+          styles.profileCard,
+          {
+            backgroundColor: Platform.OS === "android" ? colors.cardBgSolid : colors.cardBg,
+          },
+        ]}
+      >
+        {/* Avatar Section */}
+        <View style={{ alignItems: "center", marginBottom: 24 }}>
+          {authData.photoUrl ? (
+            <Image
+              style={{
+                height: 96,
+                width: 96,
+                borderRadius: 48,
+                borderWidth: 4,
+                borderColor: colors.primary,
+              }}
+              src={authData.photoUrl}
+            />
+          ) : (
+            <View
+              style={{
+                height: 96,
+                width: 96,
+                borderRadius: 48,
+                borderWidth: 4,
+                borderColor: colors.primary,
+              }}
+            >
+              <Avatar />
             </View>
+          )}
 
-            <TouchableOpacity>
-              <Text style={{ color: "#EF4444", marginTop: 12 }} onPress={signOut}>
-                Sign Out
-              </Text>
-            </TouchableOpacity>
-            <View style={styles.statsGrid}>
-              <StatBox value={1000} label="Score" />
-              <StatBox value={1000} label="Gold" />
-              <StatBox value={1000} label="Diamonds" />
-            </View>
-          </View>
+          <Text
+            style={{
+              fontSize: 24,
+              fontWeight: "800",
+              color: colors.text,
+              marginTop: 16,
+            }}
+          >
+            {authData.name}
+          </Text>
+
+          <Text
+            style={{
+              fontSize: 14,
+              color: colors.textSecondary,
+              marginTop: 4,
+            }}
+          >
+            {authData.mail}
+          </Text>
+
+          {userAddress && (
+            <Text
+              style={{
+                fontSize: 12,
+                color: colors.textSecondary,
+                marginTop: 8,
+                fontFamily: "monospace",
+              }}
+            >
+              {userAddress.slice(0, 8)}...{userAddress.slice(-6)}
+            </Text>
+          )}
+
+          <TouchableOpacity
+            style={{
+              marginTop: 16,
+              paddingHorizontal: 24,
+              paddingVertical: 12,
+              borderRadius: 16,
+              backgroundColor: "rgba(239, 68, 68, 0.1)",
+              borderWidth: 1,
+              borderColor: "#EF4444",
+            }}
+            onPress={signOut}
+          >
+            <Text
+              style={{
+                color: "#EF4444",
+                fontWeight: "700",
+                fontSize: 15,
+              }}
+            >
+              Sign Out
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.infoGrid}>
-          <InfoRow title="Favorite Team" value="Los Angeles Lakers" />
-          <InfoRow title="Favorite Sport" value="Basketball" />
-          <ActionRow title="Owned Items" subtitle="View your collectibles" onPress={() => router.push("/")} />
-          <ActionRow title="Wallet Address" subtitle="Manage wallet" onPress={() => router.push("/")} />
+        {/* Stats Grid */}
+        <View
+          style={{
+            flexDirection: "row",
+            gap: 12,
+            marginBottom: 24,
+          }}
+        >
+          <StatBox value={1000} label="Score" colors={colors} isDark={isDark} />
+          <StatBox value={1000} label="Gold" colors={colors} isDark={isDark} />
+          <StatBox value={1000} label="Diamonds" colors={colors} isDark={isDark} />
+        </View>
+
+        {/* Info Rows */}
+        <View style={{ gap: 12 }}>
+          <InfoRow title="Favorite Team" value="Los Angeles Lakers" colors={colors} isDark={isDark} />
+          <InfoRow title="Favorite Sport" value="Basketball" colors={colors} isDark={isDark} />
+          <ActionRow title="Owned Items" subtitle="View your collectibles" onPress={() => router.push("/")} colors={colors} isDark={isDark} />
+          <ActionRow title="Wallet Address" subtitle="Manage wallet" onPress={() => router.push("/")} colors={colors} isDark={isDark} />
         </View>
       </View>
-      <View style={{ marginTop: 10, elevation: 8 }}>
-        {userPosts &&
-          userPosts.map((post: FeedItem) => (
-            <PostCard
-              key={post.id}
-              content={post.content ?? "a"}
-              comments_count={post.comments_count}
-              likes_count={post.likes_count}
-              share_count={0}
-              author_id={post.author_id}
-              author_name={post.author_name}
-              created_at={post.created_at}
-              id={post.id}
-              profile_url={post.profile_url}
-              reply_to_id={post.reply_to_id}
-              is_liked={post.is_liked}
-              updated_at={post.updated_at}
-            ></PostCard>
+
+      {/* User Posts Section */}
+      {userPosts && userPosts.length > 0 && (
+        <View>
+          <Text
+            style={{
+              fontSize: 20,
+              fontWeight: "800",
+              color: colors.text,
+              marginBottom: 16,
+            }}
+          >
+            My Posts ({userPosts.length})
+          </Text>
+
+          {userPosts.map((post: FeedItem) => (
+            <View key={post.id} style={{ marginBottom: 16 }}>
+              <PostCard
+                content={post.content ?? ""}
+                comments_count={post.comments_count}
+                likes_count={post.likes_count}
+                reposts_count={0}
+                author_id={post.author_id}
+                author_name={post.author_name}
+                created_at={post.created_at}
+                id={post.id}
+                profile_url={post.profile_url}
+                reply_to_id={post.reply_to_id}
+                is_liked={post.is_liked}
+                is_reposted={false}
+                updated_at={post.updated_at}
+              />
+            </View>
           ))}
-      </View>
+        </View>
+      )}
     </LayoutProvider>
   );
 }
 
-const StatBox = ({ value, label }: { value: number; label: string }) => (
-  <View style={styles.statBox}>
-    <Text style={styles.statValue}>{value.toLocaleString()}</Text>
-    <Text style={styles.statLabel}>{label}</Text>
+const StatBox = ({ value, label, colors, isDark }: any) => (
+  <View
+    style={{
+      flex: 1,
+      backgroundColor: Platform.OS === "android" ? (isDark ? "#2D2440" : "#F9FAFB") : colors.surface,
+      borderRadius: 16,
+      padding: 16,
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: colors.border,
+    }}
+  >
+    <Text
+      style={{
+        fontSize: 24,
+        fontWeight: "800",
+        color: colors.text,
+      }}
+    >
+      {value.toLocaleString()}
+    </Text>
+    <Text
+      style={{
+        fontSize: 12,
+        color: colors.textSecondary,
+        marginTop: 4,
+      }}
+    >
+      {label}
+    </Text>
   </View>
 );
 
-const InfoRow = ({ title, value }: { title: string; value: string }) => (
-  <View style={styles.infoRow}>
-    <Text style={styles.infoRowTitle}>{title}</Text>
-    <Text style={styles.infoRowValue}>{value}</Text>
+const InfoRow = ({ title, value, colors, isDark }: any) => (
+  <View
+    style={{
+      backgroundColor: Platform.OS === "android" ? (isDark ? "#2D2440" : "#F9FAFB") : colors.surface,
+      borderRadius: 16,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+    }}
+  >
+    <Text
+      style={{
+        fontSize: 12,
+        color: colors.textSecondary,
+        marginBottom: 4,
+      }}
+    >
+      {title}
+    </Text>
+    <Text
+      style={{
+        fontSize: 16,
+        fontWeight: "600",
+        color: colors.text,
+      }}
+    >
+      {value}
+    </Text>
   </View>
 );
 
-const ActionRow = ({ title, subtitle, onPress }: { title: string; subtitle: string; onPress: () => void }) => (
-  <TouchableOpacity onPress={onPress} style={styles.actionRow}>
-    <View>
-      <Text style={styles.infoRowTitle}>{title}</Text>
-      <Text style={styles.infoRowValue}>{subtitle}</Text>
+const ActionRow = ({ title, subtitle, onPress, colors, isDark }: any) => (
+  <TouchableOpacity
+    onPress={onPress}
+    style={{
+      backgroundColor: Platform.OS === "android" ? (isDark ? "#2D2440" : "#F9FAFB") : colors.surface,
+      borderRadius: 16,
+      padding: 16,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      borderWidth: 1,
+      borderColor: colors.border,
+    }}
+  >
+    <View style={{ flex: 1 }}>
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: "600",
+          color: colors.text,
+          marginBottom: 4,
+        }}
+      >
+        {title}
+      </Text>
+      <Text
+        style={{
+          fontSize: 13,
+          color: colors.textSecondary,
+        }}
+      >
+        {subtitle}
+      </Text>
     </View>
-    <Text style={styles.arrowText}>→</Text>
+    <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
   </TouchableOpacity>
 );
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#F9FAFB",
-  },
-  loadingText: {
-    fontSize: 18,
-    marginTop: 10,
-    color: "#4B5563",
-  },
-  screenContainer: {
-    flex: 1,
-    backgroundColor: "#F3F4F6",
-  },
-  contentPadding: {
-    padding: 16,
-  },
-
-  headerBox: {
-    backgroundColor: "white",
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-    padding: 24,
-    marginBottom: 24,
-  },
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#1F2937",
-  },
-  headerSubtitle: {
-    color: "#4B5563",
-    marginTop: 4,
-  },
-
-  profileContentBox: {
-    backgroundColor: "white",
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-    padding: 24, // p-6
-  },
-  profileDetailsRow: {
-    justifyContent: "center",
-    alignItems: "center",
-
-    gap: 24, // gap-6
-  },
-  infoWrapper: {
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  userInfoTopRow: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  textWrapper: {
-    alignItems: "center",
-  },
-
-  displayNameText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#1F2937",
-  },
-  usernameText: {
-    fontSize: 14,
-    color: "#2563EB",
-  },
-  joinedText: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-
-  statsGrid: {
-    flexDirection: "row",
-
-    marginTop: 24,
-    gap: 16,
-  },
-  statBox: {
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 8,
-    padding: 16,
-    alignItems: "center",
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#1F2937",
-  },
-  statLabel: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-
-  infoGrid: {
-    marginTop: 32, // mt-8
-
-    gap: 16,
-  },
-  infoRow: {
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
-    borderRadius: 8,
-    padding: 16,
-  },
-  infoRowTitle: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-  infoRowValue: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#1F2937",
-    marginTop: 4,
-  },
-
-  actionRow: {
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
-    borderRadius: 8,
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  arrowText: {
-    fontSize: 24,
-    color: "#9CA3AF",
-  },
-});

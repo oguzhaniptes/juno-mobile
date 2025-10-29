@@ -1,8 +1,10 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from "react-native";
+import React, { useMemo, useRef, useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, useColorScheme, Animated, Easing } from "react-native";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { useSession } from "@/provider/AuthProvider";
-import { BASE_URL } from "@/constants";
+import { BASE_URL, Colors } from "@/constants";
+import { createComponentStyles } from "@/styles";
+// import { createComponentStyles, Colors } from "@/styles/componentStyles";
 
 interface CreatePostProps {
   onPostCreated?: () => void;
@@ -11,8 +13,53 @@ interface CreatePostProps {
 
 const CreatePost: React.FC<CreatePostProps> = ({ onPostCreated, onCancel }) => {
   const { authData } = useSession();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const styles = createComponentStyles(isDark);
+  const colors = isDark ? Colors.dark : Colors.light;
+
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+
+  // Animations for expanding card and sliding actions area
+  const expandAnim = useRef(new Animated.Value(0)).current; // 0 collapsed, 1 expanded
+
+  const animateTo = (to: 0 | 1) => {
+    Animated.timing(expandAnim, {
+      toValue: to,
+      duration: 240,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const onFocus = () => {
+    setIsFocused(true);
+    animateTo(1);
+  };
+
+  const onBlur = () => {
+    if (!content.trim()) {
+      setIsFocused(false);
+      animateTo(0);
+    }
+  };
+
+  const containerStyle = useMemo(
+    () => [
+      styles.createPostCard,
+      {
+        marginBottom: 0, // collapsed state should NOT add bottom spacing
+        paddingVertical: expandAnim.interpolate({ inputRange: [0, 1], outputRange: [8, 16] }),
+      },
+    ],
+    [styles, expandAnim]
+  );
+
+  const actionsHeight = expandAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 44] });
+  const actionsOpacity = expandAnim;
+  const actionsTranslate = expandAnim.interpolate({ inputRange: [0, 1], outputRange: [-8, 0] });
 
   const handleCreatePost = async () => {
     if (!content.trim()) {
@@ -26,13 +73,12 @@ const CreatePost: React.FC<CreatePostProps> = ({ onPostCreated, onCancel }) => {
     }
 
     setIsLoading(true);
-
     try {
       const response = await fetch(`${BASE_URL}/api/db/post`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${authData.idToken}`, // ✅ JWT token
+          Authorization: `Bearer ${authData.idToken}`,
         },
         body: JSON.stringify({
           content: content.trim(),
@@ -40,7 +86,6 @@ const CreatePost: React.FC<CreatePostProps> = ({ onPostCreated, onCancel }) => {
       });
 
       const data = await response.json();
-
       if (response.ok) {
         Alert.alert("Success", "Post created successfully!");
         setContent("");
@@ -57,154 +102,73 @@ const CreatePost: React.FC<CreatePostProps> = ({ onPostCreated, onCancel }) => {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
-      <View style={styles.card}>
-        {/* Input Area */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.textInput}
-            placeholder="What's on your mind?"
-            placeholderTextColor="#9CA3AF"
-            multiline
-            numberOfLines={6}
-            value={content}
-            onChangeText={setContent}
-            textAlignVertical="top"
-            maxLength={500}
-          />
-          <Text style={styles.charCount}>{content.length}/500</Text>
-        </View>
-
-        {/* Actions */}
-        <View style={styles.actions}>
-          <View style={styles.actionIcons}>
-            <TouchableOpacity style={styles.actionButton}>
-              <Ionicons name="image-outline" size={20} color="#6B7280" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
-              <Ionicons name="happy-outline" size={20} color="#6B7280" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
-              <Ionicons name="location-outline" size={20} color="#6B7280" />
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
+      <Animated.View style={containerStyle}>
+        {!isFocused ? (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <TextInput
+              style={[styles.postInput, { marginBottom: 0, flex: 1 }]}
+              placeholder="What's on your mind?"
+              placeholderTextColor={colors.text}
+              multiline
+              value={content}
+              onChangeText={setContent}
+              maxLength={200}
+              onFocus={onFocus}
+            />
+            <TouchableOpacity
+              style={[styles.postButton, { paddingHorizontal: 16, paddingVertical: 12, height: 48 }, (!content.trim() || isLoading) && { opacity: 0.5 }]}
+              onPress={handleCreatePost}
+              disabled={!content.trim() || isLoading}
+            >
+              {isLoading ? <ActivityIndicator color="white" size="small" /> : <Feather name="send" size={18} color="white" />}
             </TouchableOpacity>
           </View>
+        ) : (
+          <>
+            <TextInput
+              style={styles.postInput}
+              placeholder="What's on your mind?"
+              placeholderTextColor={colors.text}
+              multiline
+              numberOfLines={4}
+              value={content}
+              onChangeText={setContent}
+              textAlignVertical="top"
+              maxLength={200}
+              onBlur={onBlur}
+              autoFocus
+            />
 
-          <TouchableOpacity
-            style={[styles.postButton, (!content.trim() || isLoading) && styles.postButtonDisabled]}
-            onPress={handleCreatePost}
-            disabled={!content.trim() || isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="white" size="small" />
-            ) : (
-              <>
-                <Feather name="send" size={16} color="white" />
-                <Text style={styles.postButtonText}>Post</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
+            <View style={styles.postActions}>
+              <Animated.View style={[styles.actionButtons, { height: actionsHeight, opacity: actionsOpacity, transform: [{ translateY: actionsTranslate }], overflow: "hidden" }]}>
+                <TouchableOpacity style={styles.actionButton}>
+                  <Ionicons name="image-outline" size={20} color={colors.text} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.actionButton}>
+                  <Ionicons name="happy-outline" size={20} color={colors.text} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.actionButton}>
+                  <Ionicons name="location-outline" size={20} color={colors.text} />
+                </TouchableOpacity>
+              </Animated.View>
+
+              <TouchableOpacity style={[styles.postButton, (!content.trim() || isLoading) && { opacity: 0.5 }]} onPress={handleCreatePost} disabled={!content.trim() || isLoading}>
+                {isLoading ? (
+                  <ActivityIndicator color="white" size="small" />
+                ) : (
+                  <>
+                    <Feather name="send" size={16} color="white" />
+                    <Text style={styles.postButtonText}>Post</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+      </Animated.View>
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    // flex: 1,
-  },
-  scrollContent: {
-    // flexGrow: 1,
-    // padding: 16,
-  },
-  card: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    // borderWidth: 1,
-    // borderColor: "#E5E7EB",
-    padding: 16,
-    elevation: 8,
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 8,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#1F2937",
-  },
-  closeButton: {
-    padding: 4,
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  textInput: {
-    backgroundColor: "#F9FAFB",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    padding: 12,
-    fontSize: 15,
-    color: "#1F2937",
-    minHeight: 120,
-  },
-  charCount: {
-    fontSize: 12,
-    color: "#9CA3AF",
-    textAlign: "right",
-    marginTop: 4,
-  },
-  actions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  actionIcons: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  actionButton: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: "#F3F4F6",
-  },
-  postButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "#3b82f6",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 12,
-    elevation: 2,
-    shadowColor: "#3b82f6",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  postButtonDisabled: {
-    backgroundColor: "#9CA3AF",
-    elevation: 0,
-    shadowOpacity: 0,
-  },
-  postButtonText: {
-    color: "white",
-    fontSize: 15,
-    fontWeight: "600",
-  },
-});
 
 export default CreatePost;

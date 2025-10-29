@@ -1,6 +1,8 @@
+// components/InteractionButtons.tsx - YENİDEN TASARLANDI
 import { Feather } from "@expo/vector-icons";
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, GestureResponderEvent } from "react-native";
+import { View, Text, TouchableOpacity, GestureResponderEvent, useColorScheme, Platform } from "react-native";
+import { Colors } from "@/styles";
 
 interface InteractionButtonsProps {
   likes: number;
@@ -14,19 +16,45 @@ interface InteractionButtonsProps {
   handleRepost: () => void;
 }
 
-const InteractionItem = ({ iconName, count, onPress, isUserLiked, isUserResposted }: any) => {
-  let iconStyle = styles.iconStyle;
+const InteractionItem = ({ iconName, count, onPress, isUserLiked, isUserReposted, colors }: any) => {
+  let iconColor = colors.textSecondary;
+  let countColor = colors.textSecondary;
+  let buttonBg = "transparent";
 
   if (iconName === "heart" && isUserLiked) {
-    iconStyle = styles.likedIcon;
-  } else if (iconName === "repeat" && isUserResposted) {
-    iconStyle = styles.repostedIcon;
+    iconColor = "#EF4444";
+    countColor = "#EF4444";
+    buttonBg = "rgba(239, 68, 68, 0.1)";
+  } else if (iconName === "repeat" && isUserReposted) {
+    iconColor = "#10B981";
+    countColor = "#10B981";
+    buttonBg = "rgba(16, 185, 129, 0.1)";
   }
 
   return (
-    <TouchableOpacity style={styles.interactionItem} onPress={onPress}>
-      <Feather name={iconName} style={iconStyle} />
-      <Text style={styles.countText}>{count}</Text>
+    <TouchableOpacity
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 12,
+        backgroundColor: buttonBg,
+      }}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <Feather name={iconName} size={20} color={iconColor} />
+      <Text
+        style={{
+          fontSize: 14,
+          fontWeight: "600",
+          color: countColor,
+        }}
+      >
+        {count}
+      </Text>
     </TouchableOpacity>
   );
 };
@@ -34,65 +62,34 @@ const InteractionItem = ({ iconName, count, onPress, isUserLiked, isUserResposte
 const InteractionButtons = ({
   isUserLiked,
   isUserReposted,
-  likes = 100,
-  comments = 100,
-  reposts = 100,
-  viewAnaltics = 100,
+  likes = 0,
+  comments = 0,
+  reposts = 0,
+  viewAnaltics = 0,
   handleLike,
   handleComment,
   handleRepost,
 }: InteractionButtonsProps) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const colors = isDark ? Colors.dark : Colors.light;
+
   return (
-    <View style={styles.container}>
-      <InteractionItem onPress={handleLike} isUserLiked={isUserLiked} iconName="heart" count={likes} />
-
-      <InteractionItem onPress={handleComment} iconName="message-square" count={comments} />
-
-      <InteractionItem onPress={handleRepost} isUserResposted={isUserReposted} iconName="repeat" count={reposts} />
-
-      <InteractionItem iconName="bar-chart-2" count={viewAnaltics} />
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-around",
+        // borderTopWidth: 1,
+        // borderTopColor: colors.border,
+      }}
+    >
+      <InteractionItem onPress={handleLike} isUserLiked={isUserLiked} iconName="heart" count={likes} colors={colors} />
+      <InteractionItem onPress={handleComment} iconName="message-square" count={comments} colors={colors} />
+      <InteractionItem onPress={handleRepost} isUserReposted={isUserReposted} iconName="repeat" count={reposts} colors={colors} />
+      <InteractionItem iconName="bar-chart-2" count={viewAnaltics} colors={colors} />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#F3F4F6",
-  },
-
-  interactionItem: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  iconStyle: {
-    fontSize: 20,
-    marginRight: 4,
-    color: "#4B5563",
-  },
-
-  likedIcon: {
-    fontSize: 20,
-    marginRight: 4,
-    color: "#ff0000ff",
-  },
-
-  repostedIcon: {
-    fontSize: 20,
-    marginRight: 4,
-    color: "#1D9BF0",
-  },
-
-  countText: {
-    fontSize: 14,
-    color: "#4B5563",
-  },
-});
 
 export default InteractionButtons;

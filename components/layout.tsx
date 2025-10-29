@@ -1,24 +1,32 @@
 import { type PropsWithChildren } from "react";
-import { StyleSheet, ScrollView } from "react-native";
+import { ScrollView, useColorScheme, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ThemedView } from "@/components/themed-view";
-import { GlobalStyles } from "@/styles";
+import { Colors, createGlobalStyles } from "@/styles";
+import Background from "./background";
 
-export function LayoutProvider({ children }: PropsWithChildren) {
+type LayoutProviderProps = PropsWithChildren & {
+  refreshing?: boolean;
+  onRefresh?: () => void;
+};
+
+export function LayoutProvider({ children, refreshing, onRefresh }: LayoutProviderProps) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const globalStyles = createGlobalStyles(isDark);
+  const colors = isDark ? Colors.dark : Colors.light;
+
   return (
-    <SafeAreaView style={GlobalStyles.safeAreaView}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <ThemedView style={styles.themedView}>{children}</ThemedView>
-      </ScrollView>
-    </SafeAreaView>
+    <ThemedView style={{ flex: 1 }}>
+      <Background isDark={isDark} />
+      <SafeAreaView style={globalStyles.safeAreaView}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          refreshControl={onRefresh ? <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} colors={[colors.primary]} tintColor={colors.primary} /> : undefined}
+        >
+          <ThemedView style={globalStyles.themedView}>{children}</ThemedView>
+        </ScrollView>
+      </SafeAreaView>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  themedView: {
-    marginTop: 8,
-    paddingHorizontal: 24,
-    marginBottom: 54,
-    backgroundColor: "transparent",
-  },
-});
