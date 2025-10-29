@@ -2,7 +2,7 @@
 import { StyleSheet, Platform } from "react-native";
 import { Colors } from "./theme";
 
-export const createGlobalStyles = (isDark: boolean) => {
+export const createGlobalStyles = (isDark: boolean, hasBottombar: boolean) => {
   const colors = isDark ? Colors.dark : Colors.light;
 
   return StyleSheet.create({
@@ -14,7 +14,7 @@ export const createGlobalStyles = (isDark: boolean) => {
       // backgroundColor: colors.background,
     },
     safeAreaView: {
-      marginBottom: 24,
+      marginBottom: hasBottombar ? 24 : 0,
       // backgroundColor: colors.background,
     },
 

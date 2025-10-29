@@ -6,14 +6,15 @@ import { Colors, createGlobalStyles } from "@/styles";
 import Background from "./background";
 
 type LayoutProviderProps = PropsWithChildren & {
+  hasBottomBar?: boolean;
   refreshing?: boolean;
   onRefresh?: () => void;
 };
 
-export function LayoutProvider({ children, refreshing, onRefresh }: LayoutProviderProps) {
+export function LayoutProvider({ children, refreshing, onRefresh, hasBottomBar = true }: LayoutProviderProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-  const globalStyles = createGlobalStyles(isDark);
+  const globalStyles = createGlobalStyles(isDark, hasBottomBar);
   const colors = isDark ? Colors.dark : Colors.light;
 
   return (

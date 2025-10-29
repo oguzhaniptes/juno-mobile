@@ -117,234 +117,261 @@ const Community = () => {
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      {/* Gradient Background */}
-      <LinearGradient
-        colors={isDark ? ["#0F0A1E", "#1A0B2E", "#16213E"] : ["#FFFFFF", "#F8F9FA", "#F3F4F6"]}
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-        }}
-      />
+    <LayoutProvider hasBottomBar={false}>
+      {/* Cover Image */}
+      {community.photo_url && (
+        <Image
+          source={{ uri: community.photo_url }}
+          style={{
+            width: "100%",
+            height: 200,
+            marginBottom: -50,
+          }}
+          resizeMode="cover"
+        />
+      )}
 
-      <LayoutProvider>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-          {/* Cover Image */}
-          {community.photo_url && (
-            <Image
-              source={{ uri: community.photo_url }}
-              style={{
-                width: "100%",
-                height: 200,
-                marginBottom: -50,
-              }}
-              resizeMode="cover"
-            />
-          )}
-
-          {/* Main Content Card */}
-          <View
-            style={[
-              styles.communityDetailCard,
-              {
-                backgroundColor: Platform.OS === "android" ? colors.cardBgSolid : colors.cardBg,
-                marginHorizontal: 16,
-                marginTop: community.photo_url ? 0 : 16,
-              },
-            ]}
+      {/* Main Content Card */}
+      <View
+        style={[
+          styles.communityDetailCard,
+          {
+            backgroundColor: Platform.OS === "android" ? colors.cardBgSolid : colors.cardBg,
+          },
+        ]}
+      >
+        {/* Header Info */}
+        <View style={{ alignItems: "center", marginBottom: 24 }}>
+          <Text
+            style={{
+              fontSize: 28,
+              fontWeight: "800",
+              color: colors.text,
+              textAlign: "center",
+            }}
           >
-            {/* Header Info */}
-            <View style={{ alignItems: "center", marginBottom: 24 }}>
+            {community.name}
+          </Text>
+
+          <Text
+            style={{
+              fontSize: 14,
+              color: colors.textSecondary,
+              marginTop: 4,
+            }}
+          >
+            @{community.slug}
+          </Text>
+
+          {/* Stats Row */}
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 24,
+              marginTop: 16,
+            }}
+          >
+            <View style={{ alignItems: "center" }}>
               <Text
                 style={{
-                  fontSize: 28,
+                  fontSize: 24,
                   fontWeight: "800",
                   color: colors.text,
-                  textAlign: "center",
                 }}
               >
-                {community.name}
+                {community.member_count}
               </Text>
-
               <Text
                 style={{
-                  fontSize: 14,
+                  fontSize: 12,
                   color: colors.textSecondary,
                   marginTop: 4,
                 }}
               >
-                @{community.slug}
+                Members
               </Text>
-
-              {/* Stats Row */}
-              <View
-                style={{
-                  flexDirection: "row",
-                  gap: 24,
-                  marginTop: 16,
-                }}
-              >
-                <View style={{ alignItems: "center" }}>
-                  <Text
-                    style={{
-                      fontSize: 24,
-                      fontWeight: "800",
-                      color: colors.text,
-                    }}
-                  >
-                    {community.member_count}
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      color: colors.textSecondary,
-                      marginTop: 4,
-                    }}
-                  >
-                    Members
-                  </Text>
-                </View>
-
-                {community.max_capacity > 0 && (
-                  <View style={{ alignItems: "center" }}>
-                    <Text
-                      style={{
-                        fontSize: 24,
-                        fontWeight: "800",
-                        color: colors.text,
-                      }}
-                    >
-                      {community.max_capacity}
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: 12,
-                        color: colors.textSecondary,
-                        marginTop: 4,
-                      }}
-                    >
-                      Max Capacity
-                    </Text>
-                  </View>
-                )}
-              </View>
-
-              {/* Join Button */}
-              <TouchableOpacity
-                style={{
-                  marginTop: 20,
-                  paddingHorizontal: 32,
-                  paddingVertical: 14,
-                  borderRadius: 16,
-                  backgroundColor: community.is_joined ? "rgba(239, 68, 68, 0.1)" : colors.primary,
-                  borderWidth: community.is_joined ? 1 : 0,
-                  borderColor: "#EF4444",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 8,
-                  ...Platform.select({
-                    ios: {
-                      shadowColor: community.is_joined ? "#EF4444" : colors.primary,
-                      shadowOffset: { width: 0, height: 4 },
-                      shadowOpacity: 0.3,
-                      shadowRadius: 8,
-                    },
-                    android: {
-                      elevation: 4,
-                    },
-                  }),
-                }}
-              >
-                <Ionicons name={community.is_joined ? "exit-outline" : "people-outline"} size={20} color={community.is_joined ? "#EF4444" : "#FFFFFF"} />
-                <Text
-                  style={{
-                    color: community.is_joined ? "#EF4444" : "#FFFFFF",
-                    fontWeight: "700",
-                    fontSize: 16,
-                  }}
-                >
-                  {community.is_joined ? "Leave Community" : "Join Community"}
-                </Text>
-              </TouchableOpacity>
             </View>
 
-            {/* Description */}
-            {community.description && (
-              <View
-                style={{
-                  padding: 16,
-                  backgroundColor: Platform.OS === "android" ? (isDark ? "#2D2440" : "#F9FAFB") : colors.surface,
-                  borderRadius: 16,
-                  marginBottom: 20,
-                  borderWidth: 1,
-                  borderColor: colors.border,
-                }}
-              >
+            {community.max_capacity > 0 && (
+              <View style={{ alignItems: "center" }}>
                 <Text
                   style={{
-                    fontSize: 15,
+                    fontSize: 24,
+                    fontWeight: "800",
                     color: colors.text,
-                    lineHeight: 22,
                   }}
                 >
-                  {community.description}
+                  {community.max_capacity}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: colors.textSecondary,
+                    marginTop: 4,
+                  }}
+                >
+                  Max Capacity
                 </Text>
               </View>
             )}
-
-            {/* Info Grid */}
-            <View style={{ gap: 12 }}>
-              <InfoItem icon="globe-outline" label="Visibility" value={community.is_public ? "Public" : "Private"} colors={colors} isDark={isDark} />
-              <InfoItem icon="checkmark-circle-outline" label="Approval" value={community.requires_approval ? "Required" : "Not Required"} colors={colors} isDark={isDark} />
-              <InfoItem icon="calendar-outline" label="Created" value={new Date(community.created_at).toLocaleDateString()} colors={colors} isDark={isDark} />
-            </View>
           </View>
 
-          {/* Posts Section - Placeholder */}
+          {/* Join Button */}
+          <TouchableOpacity
+            style={{
+              marginTop: 20,
+              paddingHorizontal: 32,
+              paddingVertical: 14,
+              borderRadius: 16,
+              backgroundColor: community.is_joined ? "rgba(239, 68, 68, 0.1)" : colors.primary,
+              borderWidth: community.is_joined ? 1 : 0,
+              borderColor: "#EF4444",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 8,
+              ...Platform.select({
+                ios: {
+                  shadowColor: community.is_joined ? "#EF4444" : colors.primary,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                },
+                android: {
+                  elevation: 4,
+                },
+              }),
+            }}
+          >
+            <Ionicons name={community.is_joined ? "exit-outline" : "people-outline"} size={20} color={community.is_joined ? "#EF4444" : "#FFFFFF"} />
+            <Text
+              style={{
+                color: community.is_joined ? "#EF4444" : "#FFFFFF",
+                fontWeight: "700",
+                fontSize: 16,
+              }}
+            >
+              {community.is_joined ? "Leave Community" : "Join Community"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Description */}
+        {community.description && (
           <View
-            style={[
-              styles.communityPostsCard,
-              {
-                backgroundColor: Platform.OS === "android" ? colors.cardBgSolid : colors.cardBg,
-                marginHorizontal: 16,
-                marginTop: 16,
-              },
-            ]}
+            style={{
+              padding: 16,
+              backgroundColor: Platform.OS === "android" ? (isDark ? "#2D2440" : "#F9FAFB") : colors.surface,
+              borderRadius: 16,
+              marginBottom: 20,
+              borderWidth: 1,
+              borderColor: colors.border,
+            }}
           >
             <Text
               style={{
-                fontSize: 20,
-                fontWeight: "800",
+                fontSize: 15,
                 color: colors.text,
-                marginBottom: 16,
+                lineHeight: 22,
               }}
             >
-              Community Posts
+              {community.description}
             </Text>
-            <View
-              style={{
-                alignItems: "center",
-                paddingVertical: 40,
-              }}
-            >
-              <Ionicons name="chatbubbles-outline" size={48} color={colors.textSecondary} />
-              <Text
-                style={{
-                  fontSize: 16,
-                  color: colors.textSecondary,
-                  marginTop: 12,
-                }}
-              >
-                No posts yet
-              </Text>
-            </View>
           </View>
-        </ScrollView>
-      </LayoutProvider>
-    </View>
+        )}
+
+        {/* Info Grid */}
+        <View style={{ gap: 12 }}>
+          <InfoItem icon="globe-outline" label="Visibility" value={community.is_public ? "Public" : "Private"} colors={colors} isDark={isDark} />
+          <InfoItem icon="checkmark-circle-outline" label="Approval" value={community.requires_approval ? "Required" : "Not Required"} colors={colors} isDark={isDark} />
+          <InfoItem icon="calendar-outline" label="Created" value={new Date(community.created_at).toLocaleDateString()} colors={colors} isDark={isDark} />
+        </View>
+      </View>
+
+      <View
+        style={[
+          styles.communityPostsCard,
+          {
+            flex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            backgroundColor: Platform.OS === "android" ? colors.cardBgSolid : colors.cardBg,
+            marginTop: 16,
+          },
+        ]}
+      >
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: "800",
+            color: colors.text,
+          }}
+        >
+          Live Match Chat
+        </Text>
+        <TouchableOpacity
+          style={{
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            borderRadius: 16,
+            backgroundColor: "red",
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <Ionicons name={"basketball"} size={20} color={community.is_joined ? "#EF4444" : "#FFFFFF"} />
+          <Text
+            style={{
+              color: community.is_joined ? "#EF4444" : "#FFFFFF",
+              fontWeight: "700",
+              fontSize: 16,
+            }}
+          >
+            Join
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Posts Section - Placeholder */}
+      <View
+        style={[
+          styles.communityPostsCard,
+          {
+            backgroundColor: Platform.OS === "android" ? colors.cardBgSolid : colors.cardBg,
+            marginTop: 16,
+          },
+        ]}
+      >
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: "800",
+            color: colors.text,
+            marginBottom: 16,
+          }}
+        >
+          Community Posts
+        </Text>
+        <View
+          style={{
+            alignItems: "center",
+            paddingVertical: 40,
+          }}
+        >
+          <Ionicons name="chatbubbles-outline" size={48} color={colors.textSecondary} />
+          <Text
+            style={{
+              fontSize: 16,
+              color: colors.textSecondary,
+              marginTop: 12,
+            }}
+          >
+            No posts yet
+          </Text>
+        </View>
+      </View>
+    </LayoutProvider>
   );
 };
 

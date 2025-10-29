@@ -7,7 +7,6 @@ import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { View, Text, Modal, Pressable, TouchableOpacity, Alert, ActivityIndicator, Image, TextInput, ScrollView, useColorScheme, Platform } from "react-native";
 import Avatar from "@/components/ui/avatar";
-import InteractionButtons from "@/components/InteractionButtons";
 import { timeAgo } from "@/utils";
 import { Colors, createComponentStyles } from "@/styles";
 import PostCard from "@/components/Home/PostCard";
@@ -100,15 +99,6 @@ export default function PostDetailScreen() {
   const [listModalType, setListModalType] = useState<"likes" | "reposts" | null>(null);
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
-  const [isLikedState, setIsLikedState] = useState(false);
-  const [isRepostedState, setIsRepostedState] = useState(false);
-
-  useEffect(() => {
-    if (post) {
-      setIsLikedState(post.is_liked);
-      setIsRepostedState(post.is_reposted);
-    }
-  }, [post]);
 
   const isPostOwner = post && post.author_id === authData?.userId;
 
@@ -139,51 +129,6 @@ export default function PostDetailScreen() {
   useEffect(() => {
     getPostDetail();
   }, [getPostDetail]);
-
-  const toggleLike = async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/api/db/like`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authData?.idToken}`,
-        },
-        body: JSON.stringify({ post_id: id }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        setIsLikedState((prev) => !prev);
-        getPostDetail();
-      } else {
-        Alert.alert("Hata", data.message || "Beğeni başarısız.");
-      }
-    } catch (error) {
-      console.log(error);
-      Alert.alert("Hata", "Ağ hatası.");
-    }
-  };
-
-  const toggleRepost = async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/api/db/repost`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authData?.idToken}`,
-        },
-        body: JSON.stringify({ post_id: id }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        setIsRepostedState((prev) => !prev);
-        getPostDetail();
-      } else {
-        Alert.alert("Hata", data.message || "Repost başarısız.");
-      }
-    } catch (error) {
-      Alert.alert(`Hata: ${error}`);
-    }
-  };
 
   const handleOpenUserListModal = (type: "likes" | "reposts") => {
     setListModalType(type);
@@ -318,7 +263,7 @@ export default function PostDetailScreen() {
   }
 
   return (
-    <LayoutProvider>
+    <LayoutProvider hasBottomBar={false}>
       <PostCard
         isDetail={true}
         author_id={post.author_id}
@@ -401,7 +346,7 @@ export default function PostDetailScreen() {
               ]}
             >
               <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-                <Avatar />
+                <Avatar imageUrl={comment.profile_url} />
                 <View style={{ marginLeft: 8, flex: 1 }}>
                   <Text style={{ fontWeight: "700", color: colors.text }}>{comment.user_name || "Bilinmeyen Kullanıcı"}</Text>
                   <Text style={{ fontSize: 12, color: colors.textSecondary }}>{timeAgo(comment.created_at)}</Text>
