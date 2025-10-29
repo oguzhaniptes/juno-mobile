@@ -1,5 +1,5 @@
 // components/PostCard.tsx - YENİDEN TASARLANDI
-import { View, Text, Image, Alert, Pressable, Modal, TouchableOpacity, TextInput, GestureResponderEvent, useColorScheme, Platform } from "react-native";
+import { View, Text, Image, Alert, Pressable, TouchableOpacity, TextInput, GestureResponderEvent, useColorScheme, Platform } from "react-native";
 import Avatar from "@/components/ui/avatar";
 import InteractionButtons from "@/components/InteractionButtons";
 import { BASE_URL } from "@/constants";
@@ -9,6 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { timeAgo } from "@/utils";
 import { createComponentStyles, Colors } from "@/styles";
+import AppModal from "@/components/ui/AppModal";
 
 interface PostCardProps {
   isDetail: boolean;
@@ -244,66 +245,51 @@ const PostCard = ({
       />
 
       {/* Menu Modal */}
-      <Modal animationType="slide" transparent={true} visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)}>
-        <Pressable style={styles.modalOverlay} onPress={() => setIsModalVisible(false)}>
-          <Pressable style={[styles.modalSheet, { backgroundColor: colors.cardBgSolid }]} onPress={(e) => e.stopPropagation()}>
-            <View style={[styles.modalHandle, { backgroundColor: colors.border }]} />
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Gönderi Seçenekleri</Text>
-
-            {isPostOwner && (
-              <TouchableOpacity style={styles.modalDeleteButton} onPress={handleDeletePost}>
-                <Ionicons name="trash-outline" size={24} color="#EF4444" />
-                <Text style={styles.modalDeleteText}>Gönderiyi Sil</Text>
-              </TouchableOpacity>
-            )}
-
-            <TouchableOpacity style={[styles.modalCancelButton, { backgroundColor: colors.surface }]} onPress={() => setIsModalVisible(false)}>
-              <Text style={[styles.modalCancelText, { color: colors.text }]}>İptal</Text>
-            </TouchableOpacity>
-          </Pressable>
-        </Pressable>
-      </Modal>
+      <AppModal visible={isModalVisible} onClose={() => setIsModalVisible(false)}>
+        <Text style={[styles.modalTitle, { color: colors.text }]}>Gönderi Seçenekleri</Text>
+        {isPostOwner && (
+          <TouchableOpacity style={styles.modalDeleteButton} onPress={handleDeletePost}>
+            <Ionicons name="trash-outline" size={24} color="#EF4444" />
+            <Text style={styles.modalDeleteText}>Gönderiyi Sil</Text>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity style={[styles.modalCancelButton, { backgroundColor: colors.surface }]} onPress={() => setIsModalVisible(false)}>
+          <Text style={[styles.modalCancelText, { color: colors.text }]}>İptal</Text>
+        </TouchableOpacity>
+      </AppModal>
 
       {/* Comment Modal */}
-      <Modal animationType="slide" transparent={true} visible={isCommentModalVisible} onRequestClose={() => setIsCommentModalVisible(false)}>
-        <Pressable style={styles.modalOverlay} onPress={() => setIsCommentModalVisible(false)}>
-          <View style={[styles.commentModalSheet, { backgroundColor: colors.cardBgSolid }]} onTouchStart={() => {}}>
-            <View style={[styles.modalHandle, { backgroundColor: colors.border }]} />
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Yorum Yaz</Text>
-
-            <TextInput
-              style={[
-                styles.commentInput,
-                {
-                  backgroundColor: Platform.OS === "android" ? (isDark ? "#2D2440" : "#F9FAFB") : colors.surface,
-                  borderColor: colors.border,
-                  color: colors.text,
-                },
-              ]}
-              placeholder="Yorumunuzu buraya yazın..."
-              placeholderTextColor={colors.textSecondary}
-              multiline
-              value={commentText}
-              onChangeText={setCommentText}
-            />
-
-            <View style={styles.commentActions}>
-              <TouchableOpacity style={[styles.commentCancelButton, { backgroundColor: colors.surface }]} onPress={() => setIsCommentModalVisible(false)}>
-                <Text style={[styles.commentCancelText, { color: colors.text }]}>Kapat</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.commentSendButton, { backgroundColor: colors.primary }, commentText.trim() === "" && { opacity: 0.5 }]}
-                onPress={handleSendComment}
-                disabled={commentText.trim() === ""}
-              >
-                <Text style={styles.commentSendText}>Gönder</Text>
-                <Ionicons name="send" size={16} color="#FFFFFF" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Pressable>
-      </Modal>
+      <AppModal visible={isCommentModalVisible} onClose={() => setIsCommentModalVisible(false)}>
+        <Text style={[styles.modalTitle, { color: colors.text }]}>Yorum Yaz</Text>
+        <TextInput
+          style={[
+            styles.commentInput,
+            {
+              backgroundColor: Platform.OS === "android" ? (isDark ? "#2D2440" : "#F9FAFB") : colors.surface,
+              borderColor: colors.border,
+              color: colors.text,
+            },
+          ]}
+          placeholder="Yorumunuzu buraya yazın..."
+          placeholderTextColor={colors.textSecondary}
+          multiline
+          value={commentText}
+          onChangeText={setCommentText}
+        />
+        <View style={styles.commentActions}>
+          <TouchableOpacity style={[styles.commentCancelButton, { backgroundColor: colors.surface }]} onPress={() => setIsCommentModalVisible(false)}>
+            <Text style={[styles.commentCancelText, { color: colors.text }]}>Kapat</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.commentSendButton, { backgroundColor: colors.primary }, commentText.trim() === "" && { opacity: 0.5 }]}
+            onPress={handleSendComment}
+            disabled={commentText.trim() === ""}
+          >
+            <Text style={styles.commentSendText}>Gönder</Text>
+            <Ionicons name="send" size={16} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
+      </AppModal>
     </Pressable>
   );
 };
