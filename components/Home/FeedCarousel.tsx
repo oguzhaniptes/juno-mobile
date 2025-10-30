@@ -9,7 +9,7 @@ export interface FeedItem {
   type: "news" | "user-post" | "ad";
   author_id: string;
   author_name: string | null;
-  comments_count: number;
+  replies_count: number;
   content: string;
   created_at: string;
   likes_count: number;
@@ -40,7 +40,7 @@ export const renderFeedItem = ({ item }: { item: FeedItem }) => {
           content={item.content || ""}
           imageUrl={item.image_url || ""} // Using image_url
           likes={item.likes_count || 0} // Using snake_case
-          comments={item.comments_count || 0} // Using snake_case
+          comments={item.replies_count || 0} // Using snake_case
           shares={item.reposts_count || 0} // Using snake_case
           category={item.category || ""}
           title={item.title || ""}
@@ -53,9 +53,10 @@ export const renderFeedItem = ({ item }: { item: FeedItem }) => {
     return (
       <View key={itemKey}>
         <PostCard
+          isDetail={false}
           author_id={item.author_id}
           author_name={item.author_name}
-          comments_count={item.comments_count}
+          replies_count={item.replies_count}
           content={item.content}
           created_at={item.created_at}
           id={item.id}
@@ -80,7 +81,7 @@ export const renderFeedItem = ({ item }: { item: FeedItem }) => {
           imageUrl={item.image_url || ""} // Using image_url
           // Ad cards usually don't show likes/comments, but if they do, use the counts
           likes={item.likes_count || 0}
-          comments={item.comments_count || 0}
+          comments={item.replies_count || 0}
           shares={item.reposts_count || 0}
           ctaLink={item.cta_link || ""} // Using cta_link
           ctaText={item.cta_text || ""} // Using cta_text
@@ -92,9 +93,10 @@ export const renderFeedItem = ({ item }: { item: FeedItem }) => {
   return (
     <View key={itemKey}>
       <PostCard
+        isDetail={false}
         author_id={item.author_id}
         author_name={item.author_name}
-        comments_count={item.comments_count}
+        replies_count={item.replies_count}
         content={item.content}
         created_at={item.created_at}
         id={item.id}

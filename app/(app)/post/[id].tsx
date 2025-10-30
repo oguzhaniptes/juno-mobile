@@ -36,12 +36,12 @@ interface PostDetail {
   profile_url: string | null;
   likes_count: number;
   reposts_count: number;
-  comments_count: number;
+  replies_count: number;
   is_liked: boolean;
   is_reposted: boolean;
   likes: UserInteractionInfo[];
   reposts: UserInteractionInfo[];
-  comments: CommentInfo[];
+  replies: CommentInfo[];
   created_at: string;
 }
 
@@ -111,9 +111,11 @@ export default function PostDetailScreen() {
           Authorization: `Bearer ${authData?.idToken}`,
         },
       });
+
       if (response.ok) {
         const data = await response.json();
         setPost(data.data);
+        console.log("----------POST GET: ", data.data);
       } else {
         console.log("Error fetching post detail.");
         setPost(null);
@@ -268,7 +270,7 @@ export default function PostDetailScreen() {
         isDetail={true}
         author_id={post.author_id}
         author_name={post.author_name}
-        comments_count={post.comments_count}
+        replies_count={post.replies_count}
         content={post.content}
         created_at={post.created_at}
         id={post.id}
@@ -332,7 +334,7 @@ export default function PostDetailScreen() {
       {/* Comments Section */}
       <View style={{ marginTop: 16, marginBottom: 20 }}>
         {/* <Text style={[styles.commentsHeader, { color: colors.text }]}>Yorumlar ({post.comments_count})</Text> */}
-        {post.comments.map((comment: CommentInfo) => {
+        {post.replies.map((comment: CommentInfo) => {
           const isCommentOwner = comment.user_id === authData?.userId;
           return (
             <View

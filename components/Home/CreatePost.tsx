@@ -82,8 +82,11 @@ const CreatePost: React.FC<CreatePostProps> = ({ onPostCreated, onCancel }) => {
         },
         body: JSON.stringify({
           content: content.trim(),
+          post_type: "standard",
         }),
       });
+
+      console.log("res", response);
 
       const data = await response.json();
       if (response.ok) {

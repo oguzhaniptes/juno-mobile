@@ -20,7 +20,7 @@ export default function HomeScreen() {
 
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-  const globalStyles = createGlobalStyles(isDark);
+  const globalStyles = createGlobalStyles(isDark, true);
   const styles = createComponentStyles(isDark);
   const colors = isDark ? Colors.dark : Colors.light;
 

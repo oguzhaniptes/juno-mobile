@@ -1,5 +1,5 @@
 // screens/ProfileScreen.tsx - YENİDEN TASARLANDI
-import { View, Text, TouchableOpacity, ActivityIndicator, Image, useColorScheme, Platform, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, ActivityIndicator, Image, useColorScheme, Platform } from "react-native";
 import { FeedItem } from "@/components/Home/FeedCarousel";
 import PostCard from "@/components/Home/PostCard";
 import { LayoutProvider } from "@/components/layout";
@@ -11,7 +11,6 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Colors, createComponentStyles } from "@/styles";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -23,6 +22,7 @@ export default function ProfileScreen() {
 
   const [userAddress, setUserAddress] = useState<string | null>(null);
   const [userPosts, setUserPosts] = useState<[] | null>(null);
+  const [userReplies, setUserReplies] = useState<[] | null>(null);
 
   useEffect(() => {
     if (authData) {
@@ -38,15 +38,42 @@ export default function ProfileScreen() {
   }, [authData, ephemeralData, isLoading, router]);
 
   useEffect(() => {
-    const getMyPost = async () => {
+    const getUser = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/api/db/user-posts`, {
+        const response = await fetch(`${BASE_URL}/api/db/user/${authData?.userId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${authData?.idToken}`,
           },
         });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("--------User data: ", data.data);
+
+          // setUserPosts(data.data.reverse());
+        }
+      } catch (error) {
+        console.log("error", error);
+      }
+    };
+
+    getUser();
+  }, [authData]);
+
+  useEffect(() => {
+    const getMyPost = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/api/db/user/${authData?.userId}/posts`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authData?.idToken}`,
+          },
+        });
+
+        console.log(response);
 
         if (response.ok) {
           const data = await response.json();
@@ -58,6 +85,31 @@ export default function ProfileScreen() {
     };
 
     getMyPost();
+  }, [authData]);
+
+  useEffect(() => {
+    const getMyReplies = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/api/db/user/${authData?.userId}/replies`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authData?.idToken}`,
+          },
+        });
+
+        console.log(response);
+
+        if (response.ok) {
+          const data = await response.json();
+          setUserReplies(data.data.reverse());
+        }
+      } catch (error) {
+        console.log("error", error);
+      }
+    };
+
+    getMyReplies();
   }, [authData]);
 
   if (isLoading) {
@@ -214,23 +266,59 @@ export default function ProfileScreen() {
           </Text>
 
           {userPosts.map((post: FeedItem) => (
-            <View key={post.id} style={{ marginBottom: 16 }}>
-              <PostCard
-                content={post.content ?? ""}
-                comments_count={post.comments_count}
-                likes_count={post.likes_count}
-                reposts_count={0}
-                author_id={post.author_id}
-                author_name={post.author_name}
-                created_at={post.created_at}
-                id={post.id}
-                profile_url={post.profile_url}
-                reply_to_id={post.reply_to_id}
-                is_liked={post.is_liked}
-                is_reposted={false}
-                updated_at={post.updated_at}
-              />
-            </View>
+            <PostCard
+              key={post.id}
+              isDetail={false}
+              content={post.content ?? ""}
+              replies_count={post.replies_count}
+              likes_count={post.likes_count}
+              reposts_count={0}
+              author_id={post.author_id}
+              author_name={post.author_name}
+              created_at={post.created_at}
+              id={post.id}
+              profile_url={post.profile_url}
+              reply_to_id={post.reply_to_id}
+              is_liked={post.is_liked}
+              is_reposted={false}
+              updated_at={post.updated_at}
+            />
+          ))}
+        </View>
+      )}
+
+      {/* User Posts Section */}
+      {userReplies && userReplies.length > 0 && (
+        <View>
+          <Text
+            style={{
+              fontSize: 20,
+              fontWeight: "800",
+              color: colors.text,
+              marginBottom: 16,
+            }}
+          >
+            My Replies ({userReplies.length})
+          </Text>
+
+          {userReplies.map((post: FeedItem) => (
+            <PostCard
+              key={post.id}
+              isDetail={false}
+              content={post.content ?? ""}
+              replies_count={post.replies_count}
+              likes_count={post.likes_count}
+              reposts_count={0}
+              author_id={post.author_id}
+              author_name={post.author_name}
+              created_at={post.created_at}
+              id={post.id}
+              profile_url={post.profile_url}
+              reply_to_id={post.reply_to_id}
+              is_liked={post.is_liked}
+              is_reposted={false}
+              updated_at={post.updated_at}
+            />
           ))}
         </View>
       )}

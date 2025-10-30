@@ -15,7 +15,7 @@ interface PostCardProps {
   isDetail: boolean;
   author_id: string;
   author_name: string | null;
-  comments_count: number;
+  replies_count: number;
   content: string;
   created_at: string;
   id: string;
@@ -34,7 +34,7 @@ const PostCard = ({
   isDetail,
   author_id,
   author_name,
-  comments_count,
+  replies_count,
   content,
   created_at,
   id,
@@ -158,15 +158,16 @@ const PostCard = ({
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/api/db/comment`, {
+      const response = await fetch(`${BASE_URL}/api/db/post`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${authData?.idToken}`,
         },
         body: JSON.stringify({
-          post_id: id,
+          reply_to_id: id,
           content: commentText.trim(),
+          post_type: "standard",
         }),
       });
 
@@ -239,7 +240,7 @@ const PostCard = ({
         handleRepost={toggleRepost}
         handleComment={handleCommentButton}
         likes={likes_count}
-        comments={comments_count}
+        comments={replies_count}
         reposts={reposts_count}
         viewAnaltics={0}
       />
