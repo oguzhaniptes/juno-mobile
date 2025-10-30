@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity, useColorScheme } from "react-native";
 import { createComponentStyles } from "@/styles/componentStyles";
+import { router } from "expo-router";
 
 interface Team {
   name: string;
@@ -8,6 +9,7 @@ interface Team {
 }
 
 interface LiveMatchCardProps {
+  id: number;
   sport: "football" | "basketball" | "tennis";
   homeTeam: Team;
   awayTeam: Team;
@@ -18,13 +20,13 @@ interface LiveMatchCardProps {
   onPress?: () => void;
 }
 
-const LiveMatchCard: React.FC<LiveMatchCardProps> = ({ homeTeam, awayTeam, homeScore, awayScore, status, league = "EPL", onPress }) => {
+const LiveMatchCard: React.FC<LiveMatchCardProps> = ({ id, homeTeam, awayTeam, homeScore, awayScore, status, league = "EPL", onPress }) => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const styles = createComponentStyles(isDark);
 
   return (
-    <TouchableOpacity style={styles.matchCard} onPress={onPress} activeOpacity={0.95}>
+    <TouchableOpacity style={styles.matchCard} onPress={() => router.push(`/match/${id}`)} activeOpacity={0.95}>
       <View style={styles.matchHeader}>
         <View style={styles.leagueBadge}>
           <Text style={styles.leagueText}>{league}</Text>

@@ -779,5 +779,283 @@ export const createComponentStyles = (isDark: boolean) => {
       borderColor: colors.border,
       ...createCardShadow(isDark, colors, "medium"),
     },
+
+    matchDetailHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 20,
+      paddingBottom: 20,
+    },
+
+    matchDetailHeaderButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+
+    matchDetailHeaderIcon: {
+      fontSize: 24,
+      fontWeight: "600",
+      color: colors.text,
+    },
+
+    matchDetailHeaderCenter: {
+      flex: 1,
+      alignItems: "center",
+    },
+
+    matchDetailCompetitionText: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: colors.text,
+    },
+
+    matchDetailRoundText: {
+      fontSize: 12,
+      marginTop: 2,
+      color: colors.textSecondary,
+    },
+
+    // Match Score Card - scoreCard zaten var, ek özelleştirme için:
+    matchScoreContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 20,
+    },
+
+    matchTeamSection: {
+      flex: 1,
+      alignItems: "center",
+      gap: 12,
+    },
+
+    matchLastFiveContainer: {
+      flexDirection: "row",
+      gap: 4,
+    },
+
+    matchResultBadge: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+
+    matchResultText: {
+      fontSize: 10,
+      fontWeight: "700",
+    },
+
+    matchScoreSection: {
+      alignItems: "center",
+      paddingHorizontal: 20,
+    },
+
+    matchScoreDisplayRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+
+    matchScoreNumber: {
+      fontSize: 48,
+      fontWeight: "800",
+    },
+
+    matchScoreSeparator: {
+      fontSize: 32,
+      fontWeight: "800",
+    },
+
+    matchScorersContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      paddingTop: 16,
+    },
+
+    matchScorersColumn: {
+      flex: 1,
+      gap: 4,
+    },
+
+    // Tabs
+    matchTabsContainer: {
+      flexDirection: "row",
+      marginHorizontal: 20,
+      borderRadius: 16,
+      padding: 4,
+      marginBottom: 16,
+      borderWidth: 1,
+      backgroundColor: Platform.OS === "android" ? colors.cardBgSolid : colors.cardBg,
+      borderColor: colors.border,
+    },
+
+    matchTab: {
+      flex: 1,
+      paddingVertical: 12,
+      borderRadius: 12,
+      alignItems: "center",
+    },
+
+    matchTabText: {
+      fontSize: 14,
+      fontWeight: "700",
+    },
+
+    // Statistics Tab
+    matchStatRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+    },
+
+    matchStatValue: {
+      fontSize: 16,
+      fontWeight: "700",
+      width: 30,
+      textAlign: "center",
+    },
+
+    matchStatCenter: {
+      flex: 1,
+    },
+
+    matchStatLabel: {
+      fontSize: 13,
+      marginBottom: 8,
+      textAlign: "center",
+      color: colors.textSecondary,
+    },
+
+    matchStatBarContainer: {
+      width: "100%",
+    },
+
+    matchStatBar: {
+      flexDirection: "row",
+      height: 6,
+      borderRadius: 3,
+      overflow: "hidden",
+      backgroundColor: "rgba(148, 163, 184, 0.1)",
+    },
+
+    matchStatBarFill: {
+      height: "100%",
+    },
+
+    // Timeline Tab
+    matchTimelineRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 12,
+    },
+
+    matchTimelineDot: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      marginTop: 4,
+    },
+
+    matchTimelineContent: {
+      flex: 1,
+    },
+
+    matchTimelineMinute: {
+      fontSize: 14,
+      fontWeight: "700",
+      marginBottom: 4,
+      color: colors.text,
+    },
+
+    matchTimelineText: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: colors.text,
+    },
+
+    matchTimelineAssist: {
+      fontSize: 12,
+      marginTop: 2,
+      color: colors.textSecondary,
+    },
+
+    // Lineups Tab
+    matchFormationContainer: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      marginBottom: 20,
+    },
+
+    matchFormationText: {
+      fontSize: 14,
+      fontWeight: "700",
+      color: colors.textSecondary,
+    },
+
+    matchLineupsGrid: {
+      gap: 40,
+    },
+
+    matchTeamLineup: {
+      gap: 20,
+    },
+
+    matchLineupRow: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      alignItems: "center",
+    },
+
+    matchPlayerItem: {
+      alignItems: "center",
+      gap: 6,
+    },
+
+    matchPlayerCircle: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      borderWidth: 2,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+    },
+
+    matchPlayerNumber: {
+      fontSize: 12,
+      fontWeight: "700",
+      color: colors.text,
+    },
+
+    matchPlayerName: {
+      fontSize: 10,
+      fontWeight: "600",
+      textAlign: "center",
+      color: colors.text,
+    },
+
+    matchFieldDivider: {
+      height: 1,
+      borderTopWidth: 1,
+      borderStyle: "dashed",
+      marginVertical: 10,
+      borderTopColor: colors.border,
+    },
+
+    // Tab Content Container
+    matchTabContent: {
+      gap: 16,
+    },
   });
 };

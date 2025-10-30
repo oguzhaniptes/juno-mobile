@@ -6,6 +6,7 @@ interface Team {
 }
 
 export interface Match {
+  id: number;
   sport: "football" | "basketball" | "tennis";
   homeTeam: Team;
   awayTeam: Team;
@@ -16,6 +17,7 @@ export interface Match {
 
 export const liveMatches: Match[] = [
   {
+    id: 1,
     sport: "football",
     homeTeam: { name: "Chelsea", logo: "/images/chelsea_logo.png" },
     awayTeam: { name: "Arsenal", logo: "/images/arsenal_logo.png" },
@@ -24,6 +26,7 @@ export const liveMatches: Match[] = [
     status: "Halftime",
   },
   {
+    id: 2,
     sport: "football",
     homeTeam: { name: "Chelsea", logo: "/images/chelsea_logo.png" },
     awayTeam: { name: "Arsenal", logo: "/images/arsenal_logo.png" },
@@ -32,6 +35,7 @@ export const liveMatches: Match[] = [
     status: "Halftime",
   },
   {
+    id: 3,
     sport: "football",
     homeTeam: { name: "Chelsea", logo: "/images/chelsea_logo.png" },
     awayTeam: { name: "Arsenal", logo: "/images/arsenal_logo.png" },
@@ -40,6 +44,7 @@ export const liveMatches: Match[] = [
     status: "Halftime",
   },
   {
+    id: 4,
     sport: "basketball",
     homeTeam: { name: "Lakers", logo: "/images/lakers_logo.png" },
     awayTeam: { name: "Celtics", logo: "/images/celtics_logo.png" },
@@ -48,6 +53,7 @@ export const liveMatches: Match[] = [
     status: "Q3 - 05:30",
   },
   {
+    id: 5,
     sport: "tennis",
     homeTeam: { name: "Djokovic", logo: "/images/djokovic_logo.png" },
     awayTeam: { name: "Alcaraz", logo: "/images/alcaraz_logo.png" },
@@ -85,8 +91,8 @@ export const feedItems = [
     type: "ad",
     title: "Premium Sports Gear",
     description: "Get the latest and greatest sports equipment at unbeatable prices!",
-    imageUrl: "/images/ad_banner_1.png",
-    ctaText: "Shop Now",
+    image_url: "/images/ad_banner_1.png",
+    cta_text: "Shop Now",
     ctaLink: "/shop",
   },
   {
@@ -116,8 +122,8 @@ export const feedItems = [
     type: "ad",
     title: "Fantasy League Sign-ups Open!",
     description: "Create your dream team and compete for amazing prizes. Join now!",
-    imageUrl: "/images/ad_fantasy.png",
-    ctaText: "Sign Up",
+    image_url: "/images/ad_fantasy.png",
+    cta_text: "Sign Up",
     ctaLink: "/fantasy-league",
   },
 ] as FeedItem[];
