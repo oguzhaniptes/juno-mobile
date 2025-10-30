@@ -6,7 +6,7 @@ import { Colors } from "@/styles";
 
 interface InteractionButtonsProps {
   likes: number;
-  comments: number;
+  replies: number;
   reposts: number;
   viewAnaltics?: number;
   isUserLiked: boolean;
@@ -63,7 +63,7 @@ const InteractionButtons = ({
   isUserLiked,
   isUserReposted,
   likes = 0,
-  comments = 0,
+  replies = 0,
   reposts = 0,
   viewAnaltics = 0,
   handleLike,
@@ -85,7 +85,7 @@ const InteractionButtons = ({
       }}
     >
       <InteractionItem onPress={handleLike} isUserLiked={isUserLiked} iconName="heart" count={likes} colors={colors} />
-      <InteractionItem onPress={handleComment} iconName="message-square" count={comments} colors={colors} />
+      <InteractionItem onPress={handleComment} iconName="message-square" count={replies} colors={colors} />
       <InteractionItem onPress={handleRepost} isUserReposted={isUserReposted} iconName="repeat" count={reposts} colors={colors} />
       <InteractionItem iconName="bar-chart-2" count={viewAnaltics} colors={colors} />
     </View>

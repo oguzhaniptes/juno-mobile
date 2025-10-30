@@ -20,13 +20,13 @@ interface PostCardProps {
   created_at: string;
   id: string;
   likes_count: number;
+  reposts_count: number;
   profile_url: string | null;
   reply_to_id: string | null;
   updated_at: string | null;
   image_url?: string;
   is_liked: boolean;
   is_reposted: boolean;
-  reposts_count?: number;
   onPostDeleted?: (postId: string) => void;
 }
 
@@ -43,7 +43,7 @@ const PostCard = ({
   image_url,
   is_liked,
   is_reposted,
-  reposts_count = 0,
+  reposts_count,
   onPostDeleted,
 }: PostCardProps) => {
   const { authData } = useSession();
@@ -240,7 +240,7 @@ const PostCard = ({
         handleRepost={toggleRepost}
         handleComment={handleCommentButton}
         likes={likes_count}
-        comments={replies_count}
+        replies={replies_count}
         reposts={reposts_count}
         viewAnaltics={0}
       />

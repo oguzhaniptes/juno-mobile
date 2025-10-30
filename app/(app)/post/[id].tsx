@@ -19,13 +19,19 @@ interface UserInteractionInfo {
 }
 
 interface CommentInfo {
-  id: string;
-  user_id: string;
-  user_name: string | null;
-  profile_url: string | null;
+  author_id: string;
+  author_name: string;
   content: string;
   created_at: string;
-  updated_at: string | null;
+  id: string;
+  is_liked: boolean;
+  is_reposted: boolean;
+  profile_url: string;
+  likes_count: number;
+  replies_count: number;
+  reposts_count: number;
+  reply_to_id: string;
+  updated_at: string;
 }
 
 interface PostDetail {
@@ -42,6 +48,8 @@ interface PostDetail {
   likes: UserInteractionInfo[];
   reposts: UserInteractionInfo[];
   replies: CommentInfo[];
+  reply_to_id: string;
+  updated_at: string;
   created_at: string;
 }
 
@@ -267,6 +275,7 @@ export default function PostDetailScreen() {
   return (
     <LayoutProvider hasBottomBar={false}>
       <PostCard
+        key={post.id}
         isDetail={true}
         author_id={post.author_id}
         author_name={post.author_name}
@@ -274,13 +283,13 @@ export default function PostDetailScreen() {
         content={post.content}
         created_at={post.created_at}
         id={post.id}
+        likes_count={post.likes_count}
+        reposts_count={post.reposts_count}
+        profile_url={post.profile_url}
         is_liked={post.is_liked}
         is_reposted={post.is_reposted}
-        likes_count={post.likes_count}
-        profile_url={post.profile_url}
-        reply_to_id={"nuil"}
-        updated_at={"none"}
-        image_url={""}
+        reply_to_id={post.reply_to_id}
+        updated_at={post.updated_at}
       ></PostCard>
 
       {/* Stats Section */}
@@ -334,35 +343,25 @@ export default function PostDetailScreen() {
       {/* Comments Section */}
       <View style={{ marginTop: 16, marginBottom: 20 }}>
         {/* <Text style={[styles.commentsHeader, { color: colors.text }]}>Yorumlar ({post.comments_count})</Text> */}
-        {post.replies.map((comment: CommentInfo) => {
-          const isCommentOwner = comment.user_id === authData?.userId;
-          return (
-            <View
-              key={comment.id}
-              style={[
-                styles.commentCard,
-                {
-                  backgroundColor: Platform.OS === "android" ? colors.cardBgSolid : colors.cardBg,
-                  borderColor: colors.border,
-                },
-              ]}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-                <Avatar imageUrl={comment.profile_url} />
-                <View style={{ marginLeft: 8, flex: 1 }}>
-                  <Text style={{ fontWeight: "700", color: colors.text }}>{comment.user_name || "Bilinmeyen Kullanıcı"}</Text>
-                  <Text style={{ fontSize: 12, color: colors.textSecondary }}>{timeAgo(comment.created_at)}</Text>
-                </View>
-                {isCommentOwner && (
-                  <Pressable onPress={() => handleOpenCommentMenu(comment.id, comment.user_id)} style={{ padding: 5 }}>
-                    <Ionicons name="ellipsis-vertical" size={20} color={colors.textSecondary} />
-                  </Pressable>
-                )}
-              </View>
-              <Text style={{ color: colors.text, lineHeight: 20 }}>{comment.content}</Text>
-            </View>
-          );
-        })}
+        {post.replies.map((item: CommentInfo) => (
+          <PostCard
+            key={item.id}
+            isDetail={false}
+            author_id={item.author_id}
+            author_name={item.author_name}
+            replies_count={item.replies_count}
+            content={item.content}
+            created_at={item.created_at}
+            id={item.id}
+            likes_count={item.likes_count}
+            reposts_count={item.reposts_count}
+            profile_url={item.profile_url}
+            is_liked={item.is_liked}
+            is_reposted={item.is_reposted}
+            reply_to_id={item.reply_to_id}
+            updated_at={item.updated_at}
+          />
+        ))}
       </View>
 
       {/* Modals */}

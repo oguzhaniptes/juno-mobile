@@ -12,7 +12,7 @@ interface CommunityCardProps {
 }
 
 export const CommunityCard: React.FC<CommunityCardProps> = ({ name, members, max_member, description, cover, onJoin, onPress, isJoined = false }) => (
-  <TouchableOpacity onPress={onPress} style={styles.cardContainer} activeOpacity={0.7}>
+  <TouchableOpacity onPress={onPress} style={styles.cardContainer}>
     {/* Sol Kısım: Avatar */}
     <View style={styles.cardImageWrapper}>
       {cover ? (

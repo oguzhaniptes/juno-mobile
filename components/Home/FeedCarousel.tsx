@@ -13,7 +13,7 @@ export interface FeedItem {
   content: string;
   created_at: string;
   likes_count: number;
-  reposts_count?: number;
+  reposts_count: number;
   profile_url: string | null;
   reply_to_id: string | null;
   updated_at: string | null;
@@ -61,6 +61,7 @@ export const renderFeedItem = ({ item }: { item: FeedItem }) => {
           created_at={item.created_at}
           id={item.id}
           likes_count={item.likes_count}
+          reposts_count={item.reposts_count}
           profile_url={item.profile_url}
           is_liked={item.is_liked}
           is_reposted={item.is_reposted}

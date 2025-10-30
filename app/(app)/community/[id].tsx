@@ -4,7 +4,7 @@ import { BASE_URL } from "@/constants";
 import { useSession } from "@/provider/AuthProvider";
 import { useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, View, Text, Image, TouchableOpacity, ScrollView, useColorScheme, Platform } from "react-native";
+import { ActivityIndicator, View, Text, Image, TouchableOpacity, ScrollView, useColorScheme, Platform, Alert } from "react-native";
 import { Colors, createComponentStyles } from "@/styles";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,7 +17,7 @@ interface CommunityDetail {
   photo_url: string | null;
   max_capacity: number;
   member_count: number;
-  owner_id: number;
+  owner_id: string;
   is_public: boolean;
   requires_approval: boolean;
   created_at: string;
@@ -35,6 +35,9 @@ const Community = () => {
 
   const [community, setCommunity] = useState<CommunityDetail | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const isOwner = community && community.owner_id === authData?.userId;
+  const isJoined = community && community.is_joined;
 
   const getCommunityDetail = useCallback(async () => {
     try {
@@ -65,6 +68,45 @@ const Community = () => {
   useEffect(() => {
     getCommunityDetail();
   }, [getCommunityDetail]);
+
+  const handleToggleCommunity = async () => {
+    if (!community) {
+      Alert.alert("Error", "Community not found.");
+      return;
+    }
+
+    if (isOwner) {
+      Alert.alert("Error you can leave and join your community.");
+      return;
+    }
+
+    if (!authData?.idToken) {
+      Alert.alert("Error", "Please login to leave communities");
+      return;
+    }
+
+    const endpoint = isJoined ? "leave-community" : "join-community";
+    try {
+      const response = await fetch(`${BASE_URL}/api/db/${endpoint}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authData.idToken}`,
+        },
+        body: JSON.stringify({ community_id: community.id }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          Alert.alert("Success", result.message);
+          getCommunityDetail();
+        }
+      }
+    } catch {
+      Alert.alert("Error", "Network error occurred");
+    }
+  };
 
   if (loading) {
     return (
@@ -241,6 +283,7 @@ const Community = () => {
                 },
               }),
             }}
+            onPress={handleToggleCommunity}
           >
             <Ionicons name={community.is_joined ? "exit-outline" : "people-outline"} size={20} color={community.is_joined ? "#EF4444" : "#FFFFFF"} />
             <Text
@@ -250,7 +293,7 @@ const Community = () => {
                 fontSize: 16,
               }}
             >
-              {community.is_joined ? "Leave Community" : "Join Community"}
+              {isOwner ? "Close Community" : community.is_joined ? "Leave Community" : "Join Community"}
             </Text>
           </TouchableOpacity>
         </View>

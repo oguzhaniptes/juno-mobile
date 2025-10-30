@@ -244,13 +244,12 @@ export default function CommunityPage() {
         ) : (
           <>
             {communities.length > 0 ? (
-              <View>
+              <View style={{ gap: 16 }}>
                 <Text
                   style={{
                     fontSize: 18,
                     fontWeight: "700",
                     color: colors.text,
-                    marginBottom: 16,
                   }}
                 >
                   Your Communities ({communities.length})
