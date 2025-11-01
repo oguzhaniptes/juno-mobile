@@ -30,7 +30,7 @@ export default function HomeScreen() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${authData?.idToken}`,
+          Authorization: `Bearer ${authData?.sessionToken}`,
         },
       });
       if (response.ok) {
@@ -43,7 +43,7 @@ export default function HomeScreen() {
     } catch (error) {
       console.log("error", error);
     }
-  }, [authData?.idToken]);
+  }, [authData?.sessionToken]);
 
   useEffect(() => {
     getFeed();

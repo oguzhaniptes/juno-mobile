@@ -76,7 +76,7 @@ const PostCard = ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${authData?.idToken}`,
+          Authorization: `Bearer ${authData?.sessionToken}`,
         },
         body: JSON.stringify({ post_id: id }),
       });
@@ -100,7 +100,7 @@ const PostCard = ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${authData?.idToken}`,
+          Authorization: `Bearer ${authData?.sessionToken}`,
         },
         body: JSON.stringify({ post_id: id }),
       });
@@ -130,7 +130,7 @@ const PostCard = ({
             const response = await fetch(`${BASE_URL}/api/db/post/${id}`, {
               method: "DELETE",
               headers: {
-                Authorization: `Bearer ${authData?.idToken}`,
+                Authorization: `Bearer ${authData?.sessionToken}`,
               },
             });
 
@@ -162,7 +162,7 @@ const PostCard = ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${authData?.idToken}`,
+          Authorization: `Bearer ${authData?.sessionToken}`,
         },
         body: JSON.stringify({
           reply_to_id: id,

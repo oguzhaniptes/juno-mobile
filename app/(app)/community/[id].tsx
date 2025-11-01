@@ -45,7 +45,7 @@ const Community = () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${authData?.idToken}`,
+          Authorization: `Bearer ${authData?.sessionToken}`,
         },
       });
 
@@ -63,7 +63,7 @@ const Community = () => {
     } finally {
       setLoading(false);
     }
-  }, [authData?.idToken, id]);
+  }, [authData?.sessionToken, id]);
 
   useEffect(() => {
     getCommunityDetail();
@@ -80,7 +80,7 @@ const Community = () => {
       return;
     }
 
-    if (!authData?.idToken) {
+    if (!authData?.sessionToken) {
       Alert.alert("Error", "Please login to leave communities");
       return;
     }

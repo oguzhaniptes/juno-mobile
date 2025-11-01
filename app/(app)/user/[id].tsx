@@ -53,7 +53,7 @@ const User = () => {
       const headers: HeadersInit = {
         "Content-Type": "application/json",
       };
-      if (authData?.idToken) {
+      if (authData?.sessionToken) {
         headers["Authorization"] = `Bearer ${authData.idToken}`;
       }
 
@@ -84,7 +84,7 @@ const User = () => {
     } finally {
       setLoading(false);
     }
-  }, [authData?.idToken, userId]);
+  }, [authData?.sessionToken, userId]);
 
   const fetchFollowList = useCallback(
     async (type: ModalContentType) => {
@@ -99,7 +99,7 @@ const User = () => {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authData?.idToken}`,
+            Authorization: `Bearer ${authData?.sessionToken}`,
           },
         });
 
@@ -123,7 +123,7 @@ const User = () => {
         setListLoading(false);
       }
     },
-    [userId, authData?.idToken]
+    [userId, authData?.sessionToken]
   );
 
   const handleStatPress = (type: ModalContentType) => {
@@ -133,7 +133,7 @@ const User = () => {
   };
 
   const handleFollowToggle = async () => {
-    if (!authData?.idToken) {
+    if (!authData?.sessionToken) {
       Alert.alert("Giriş Yapmalısınız", "Takip etmek veya takibi bırakmak için lütfen giriş yapın.");
       return;
     }
@@ -263,7 +263,7 @@ const User = () => {
         <View style={styles.profileImageContainer}>
           {user.photo ? <Image source={{ uri: user.photo }} style={styles.profileImage} /> : <Avatar />}
 
-          {!isMyProfile && authData?.idToken && (
+          {!isMyProfile && authData?.sessionToken && (
             <TouchableOpacity style={[styles.followButton, isFollowingState ? styles.unfollowButton : styles.followButtonActive]} onPress={handleFollowToggle}>
               <Text style={isFollowingState ? styles.unfollowButtonText : styles.followButtonText}>{isFollowingState ? "Takibi Bırak" : "Takip Et"}</Text>
             </TouchableOpacity>

@@ -57,7 +57,7 @@ export default function CommunityPage() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${authData?.idToken}`,
+          Authorization: `Bearer ${authData?.sessionToken}`,
         },
       });
 
@@ -73,7 +73,7 @@ export default function CommunityPage() {
     } finally {
       setFetchLoading(false);
     }
-  }, [authData?.idToken]);
+  }, [authData?.sessionToken]);
 
   useEffect(() => {
     fetchCommunities();
@@ -107,7 +107,7 @@ export default function CommunityPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${authData?.idToken}`,
+          Authorization: `Bearer ${authData?.sessionToken}`,
         },
         body: JSON.stringify(payload),
       });
@@ -138,7 +138,7 @@ export default function CommunityPage() {
   };
 
   const handleJoinCommunity = async (communityId: string, isJoined: boolean) => {
-    if (!authData?.idToken) {
+    if (!authData?.sessionToken) {
       Alert.alert("Error", "Please login to join communities");
       return;
     }
@@ -149,7 +149,7 @@ export default function CommunityPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${authData.idToken}`,
+          Authorization: `Bearer ${authData.sessionToken}`,
         },
         body: JSON.stringify({ community_id: communityId }),
       });

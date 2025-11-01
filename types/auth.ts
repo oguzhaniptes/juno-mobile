@@ -10,6 +10,7 @@ export interface AuthData {
   salt: string;
   userId: string;
   idToken: string;
+  sessionToken: string;
   provider: string;
   name: string | null;
   mail: string | null;

@@ -44,7 +44,7 @@ export default function ProfileScreen() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authData?.idToken}`,
+            Authorization: `Bearer ${authData?.sessionToken}`,
           },
         });
 
@@ -69,7 +69,7 @@ export default function ProfileScreen() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authData?.idToken}`,
+            Authorization: `Bearer ${authData?.sessionToken}`,
           },
         });
 
@@ -94,7 +94,7 @@ export default function ProfileScreen() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authData?.idToken}`,
+            Authorization: `Bearer ${authData?.sessionToken}`,
           },
         });
 

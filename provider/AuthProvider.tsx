@@ -85,6 +85,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
 
   // Additional User Info
   const [[isLoadingUserId, userId], setUserId] = useStorageState("userId");
+  const [[isLoadingSessionToken, sessionToken], setSessionToken] = useStorageState("sessionToken");
   const [[isLoadingIdToken, idToken], setIdToken] = useStorageState("idToken");
   const [[isLoadingName, name], setName] = useStorageState("name");
   const [[isLoadingMail, mail], setMail] = useStorageState("mail");
@@ -106,7 +107,16 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const [microsoftResponse, setMicrosoftResponse] = useState<AuthSessionResult | null>(null);
 
   const isLoading =
-    isLoadingUserId || isLoadingSalt || isAuthLoading || isLoadingProvider || isLoadingName || isLoadingMail || isLoadingPhotoUrl || isLoadingMaxEpoch || isLoadingIdToken;
+    isLoadingUserId ||
+    isLoadingSalt ||
+    isAuthLoading ||
+    isLoadingProvider ||
+    isLoadingName ||
+    isLoadingMail ||
+    isLoadingPhotoUrl ||
+    isLoadingMaxEpoch ||
+    isLoadingIdToken ||
+    isLoadingSessionToken;
 
   const isEpheremalLoading = isLoadingRandomness || isLoadingPubKey || isLoadingPrivKey || isLoadingNonce;
 
@@ -137,12 +147,13 @@ export function SessionProvider({ children }: PropsWithChildren) {
           const data = await resp.json();
           console.log(`${provider} token response:`, data);
 
-          if (data.salt && data.user_id && data.id_token) {
+          if (data.salt && data.user_id && data.id_token && data.session_token) {
             console.log(`${provider} user authenticated:`, data);
             setUserId(data.user_id);
             setSalt(data.salt);
             setProvider(provider);
             setIdToken(data.id_token);
+            setSessionToken(data.session_token);
 
             if (data.name) setName(data.name);
             if (data.mail) setMail(data.mail);
@@ -227,7 +238,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
     handleAuthResponse(microsoftResponse, AuthProvider.MICROSOFT);
   }, [handleAuthResponse, microsoftResponse]);
 
-  const authData: AuthData | null = userId && salt && provider && idToken ? { userId, salt, provider, idToken, mail, name, photoUrl } : null;
+  const authData: AuthData | null = userId && salt && provider && idToken && sessionToken ? { userId, salt, provider, idToken, sessionToken, mail, name, photoUrl } : null;
 
   const ephemeralData: EphemeralData | null =
     randomness && ephemeralPublicKey && ephemeralPrivateKey

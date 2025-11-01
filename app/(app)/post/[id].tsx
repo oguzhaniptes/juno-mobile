@@ -116,7 +116,7 @@ export default function PostDetailScreen() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${authData?.idToken}`,
+          Authorization: `Bearer ${authData?.sessionToken}`,
         },
       });
 
@@ -134,7 +134,7 @@ export default function PostDetailScreen() {
     } finally {
       setLoading(false);
     }
-  }, [authData?.idToken, id]);
+  }, [authData?.sessionToken, id]);
 
   useEffect(() => {
     getPostDetail();
@@ -151,17 +151,19 @@ export default function PostDetailScreen() {
       return;
     }
     try {
-      const response = await fetch(`${BASE_URL}/api/db/comment`, {
+      const response = await fetch(`${BASE_URL}/api/db/post`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${authData?.idToken}`,
+          Authorization: `Bearer ${authData?.sessionToken}`,
         },
         body: JSON.stringify({
-          post_id: id,
+          reply_to_id: id,
           content: commentText.trim(),
+          post_type: "standard",
         }),
       });
+
       if (response.ok) {
         Alert.alert("Başarılı", "Yorumunuz eklendi!");
         setCommentText("");
@@ -188,7 +190,7 @@ export default function PostDetailScreen() {
             const response = await fetch(`${BASE_URL}/api/db/post/${id}`, {
               method: "DELETE",
               headers: {
-                Authorization: `Bearer ${authData?.idToken}`,
+                Authorization: `Bearer ${authData?.sessionToken}`,
               },
             });
             const data = await response.json();

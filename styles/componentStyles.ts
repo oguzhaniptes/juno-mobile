@@ -1057,5 +1057,160 @@ export const createComponentStyles = (isDark: boolean) => {
     matchTabContent: {
       gap: 16,
     },
+
+    gamesHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 24,
+    },
+
+    gamesTitle: {
+      fontSize: 28,
+      fontWeight: "800",
+      color: colors.text,
+    },
+
+    gameCard: {
+      borderRadius: 24,
+      padding: 24,
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: Platform.OS === "android" ? colors.cardBgSolid : colors.cardBg,
+      ...createCardShadow(isDark, colors, "heavy"),
+      overflow: "hidden",
+    },
+
+    gameCardDisabled: {
+      opacity: 0.6,
+    },
+
+    gameCardHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      marginBottom: 16,
+    },
+
+    gameIconContainer: {
+      width: 64,
+      height: 64,
+      borderRadius: 20,
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+    },
+
+    gameIcon: {
+      fontSize: 32,
+    },
+
+    gameComingSoonBadge: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 12,
+    },
+
+    gameComingSoonText: {
+      fontSize: 11,
+      fontWeight: "700",
+      color: "#FFFFFF",
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
+
+    gameCardContent: {
+      gap: 8,
+    },
+
+    gameTitle: {
+      fontSize: 24,
+      fontWeight: "800",
+      color: colors.text,
+    },
+
+    gameDescription: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      lineHeight: 20,
+    },
+
+    gameStatsRow: {
+      flexDirection: "row",
+      gap: 16,
+      marginTop: 12,
+    },
+
+    gameStatItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+    },
+
+    gameStatIcon: {
+      fontSize: 16,
+    },
+
+    gameStatText: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: colors.textSecondary,
+    },
+
+    gameCardFooter: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginTop: 16,
+      paddingTop: 16,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+
+    gamePlayButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      backgroundColor: colors.primary,
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      borderRadius: 16,
+      ...Platform.select({
+        ios: {
+          shadowColor: colors.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.4,
+          shadowRadius: 8,
+        },
+        android: {
+          elevation: 8,
+        },
+      }),
+    },
+
+    gamePlayButtonText: {
+      color: "#FFFFFF",
+      fontSize: 15,
+      fontWeight: "700",
+    },
+
+    gameDifficultyBadge: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 12,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+
+    gameDifficultyText: {
+      fontSize: 12,
+      fontWeight: "700",
+      color: colors.text,
+    },
   });
 };

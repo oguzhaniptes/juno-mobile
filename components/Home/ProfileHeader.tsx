@@ -19,14 +19,14 @@ const ProfileHeader = () => {
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
 
   const getUser = useCallback(async () => {
-    if (!authData?.userId || !authData?.idToken) return;
+    if (!authData?.userId || !authData?.sessionToken) return;
 
     try {
       const response = await fetch(`${BASE_URL}/api/db/user/${authData?.userId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${authData?.idToken}`,
+          Authorization: `Bearer ${authData?.sessionToken}`,
         },
       });
 
@@ -46,7 +46,7 @@ const ProfileHeader = () => {
     } catch (error) {
       console.log("error", error);
     }
-  }, [authData?.idToken, authData?.userId]);
+  }, [authData?.sessionToken, authData?.userId]);
 
   useEffect(() => {
     getUser();
@@ -98,7 +98,7 @@ const ProfileHeader = () => {
   }
 
   const claimSilver = async () => {
-    if (!authData?.userId || !authData?.idToken) return;
+    if (!authData?.userId || !authData?.sessionToken) return;
     if (!isClaimReady) return Alert.alert("Bekle", "Gümüş talep etmek için 5 dakikalık bekleme süresi henüz dolmadı.");
 
     try {
@@ -106,7 +106,7 @@ const ProfileHeader = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${authData?.idToken}`,
+          Authorization: `Bearer ${authData?.sessionToken}`,
         },
       });
 

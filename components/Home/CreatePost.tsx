@@ -78,7 +78,7 @@ const CreatePost: React.FC<CreatePostProps> = ({ onPostCreated, onCancel }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${authData.idToken}`,
+          Authorization: `Bearer ${authData.sessionToken}`,
         },
         body: JSON.stringify({
           content: content.trim(),

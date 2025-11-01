@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, useColorScheme, Platform } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, useColorScheme, Platform } from "react-native";
 import { Colors, createComponentStyles } from "@/styles";
 
 // Types
